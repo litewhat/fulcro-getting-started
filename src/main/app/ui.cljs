@@ -20,8 +20,7 @@
     (dom/h5 (str name " " "(age: " age ")"))
     (dom/button {:onClick #(onDelete name)} "X")))
 
-(def ui-person (comp/factory Person {:keyfn :person/name}))
-
+(def ui-person (comp/computed-factory Person {:keyfn :person/name}))
 
 (defsc PersonList
   [this {:keys [:list/label :list/people]}]
@@ -38,7 +37,7 @@
    (dom/div
      (dom/h4 label)
      (dom/ul
-       (map (fn [p] (ui-person (comp/computed p {:onDelete delete-person}))) people)))))
+       (map (fn [p] (ui-person p {:onDelete delete-person})) people)))))
 
 (def ui-person-list (comp/factory PersonList))
 
