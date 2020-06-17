@@ -1,6 +1,7 @@
 (ns app.ui
   (:require [com.fulcrologic.fulcro.components :as comp :refer [defsc]]
-            [com.fulcrologic.fulcro.dom :as dom]))
+            [com.fulcrologic.fulcro.dom :as dom]
+            [app.person.mutations :as mut]))
 
 (defsc ClickCounter
   [this {:keys [:counter/clicks :counter/name]}]
@@ -33,7 +34,9 @@
                                     "Enemies" [(comp/get-initial-state Person {:name "Jonathan" :age 45})
                                                (comp/get-initial-state Person {:name "Daren" :age 25})]
                                     [])})}
-  (let [delete-person (fn [pname] (js/console.log "Asked to delete" pname))]
+  (let [delete-person (fn [pname]
+                        (js/console.log "Asked to delete" pname)
+                        (comp/transact! this [(mut/delete-person {:list-name label :name pname})]))]
    (dom/div
      (dom/h4 label)
      (dom/ul
@@ -57,14 +60,13 @@
       (ui-person-list enemies))))
 
 
-(comment
-  (comp/get-initial-state Person {:name "Paweł" :age 28}))
-
-(comment
-  (comp/get-query Person))
 
 (comment
   (comp/computed-factory Person {:keyfn :person/name}))
+
+(comment
+  (comp/get-initial-state Person {:name "Paweł" :age 28})
+  (comp/get-query Person))
 
 (comment
   (require '[com.fulcrologic.fulcro.algorithms.denormalize :as fdn])
