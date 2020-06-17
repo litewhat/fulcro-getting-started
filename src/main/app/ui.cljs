@@ -12,13 +12,16 @@
     (dom/p (str "Clicked: " clicks " times"))))
 
 (defsc Person
-  [this {:keys [:person/name :person/age]}]
+  [this {:keys [:person/name :person/age]} {:keys [onDelete]}]
   {:query         [:person/name :person/age]
    :initial-state (fn [{:keys [name age] :as params}] {:person/name name :person/age age})}
+  (js/console.log "Computed values:" (comp/get-computed this))
   (dom/li
-    (dom/h5 (str name " " "(age: " age ")"))))
+    (dom/h5 (str name " " "(age: " age ")"))
+    (dom/button {:onClick #(onDelete name)} "X")))
 
 (def ui-person (comp/factory Person {:keyfn :person/name}))
+
 
 (defsc PersonList
   [this {:keys [:list/label :list/people]}]
@@ -31,15 +34,16 @@
                                     "Enemies" [(comp/get-initial-state Person {:name "Jonathan" :age 45})
                                                (comp/get-initial-state Person {:name "Daren" :age 25})]
                                     [])})}
-  (dom/div
-    (dom/h4 label)
-    (dom/ul
-      (map ui-person people))))
+  (let [delete-person (fn [pname] (js/console.log "Asked to delete" pname))]
+   (dom/div
+     (dom/h4 label)
+     (dom/ul
+       (map (fn [p] (ui-person (comp/computed p {:onDelete delete-person}))) people)))))
 
 (def ui-person-list (comp/factory PersonList))
 
 (defsc Root
-  [this {:keys [friends enemies ui/react-key]}]
+  [this {:keys [friends enemies]}]
   {:query         [{:friends (comp/get-query PersonList)}
                    {:enemies (comp/get-query PersonList)}]
    :initial-state (fn [params]
@@ -59,6 +63,9 @@
 
 (comment
   (comp/get-query Person))
+
+(comment
+  (comp/computed-factory Person {:keyfn :person/name}))
 
 (comment
   (require '[com.fulcrologic.fulcro.algorithms.denormalize :as fdn])
