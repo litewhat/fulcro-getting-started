@@ -13,7 +13,7 @@
 
 (defsc Person
   [this {:keys [:person/name :person/age]}]
-  {}
+  {:initial-state (fn [{:keys [name age] :as params}] {:person/name name :person/age age})}
   (dom/li
     (dom/h5 (str name " " "(age: " age ")"))))
 
@@ -21,7 +21,14 @@
 
 (defsc PersonList
   [this {:keys [:list/label :list/people]}]
-  {}
+  {:initial-state (fn [{:keys [label]}]
+                    {:list/label  label
+                     :list/people (case label
+                                    "Friends" [(comp/get-initial-state Person {:name "Andrew" :age 26})
+                                               (comp/get-initial-state Person {:name "Diana" :age 18})]
+                                    "Enemies" [(comp/get-initial-state Person {:name "Jonathan" :age 45})
+                                               (comp/get-initial-state Person {:name "Daren" :age 25})]
+                                    [])})}
   (dom/div
     (dom/h4 label)
     (dom/ul
@@ -30,22 +37,23 @@
 (def ui-person-list (comp/factory PersonList))
 
 (defsc Root
-  [this {:keys [ui/react-key]}]
-  {}
-  (let [ui-data {:friends {:list/label  "Friends"
-                           :list/people [{:person/name "Andrew"
-                                          :person/age  26}
-                                         {:person/name "Diana"
-                                          :person/age  18}]}
-                 :enemies {:list/label  "Enemies"
-                           :list/people [{:person/name "Jonathan"
-                                          :person/age  45}
-                                         {:person/name "Daren"
-                                          :person/age  25}]}}]
-    (js/console.log "Root" this)
-    (js/console.log "Props of Root:" (comp/props this))
-    (dom/div :.container
-      (dom/h1 "Root component")
-      (dom/div
-        (ui-person-list (:friends ui-data))
-        (ui-person-list (:enemies ui-data))))))
+  [this {:keys [friends enemies ui/react-key]}]
+  {:initial-state (fn [params]
+                    {:friends (comp/get-initial-state PersonList {:label "Friends"})
+                     :enemies (comp/get-initial-state PersonList {:label "Enemies"})})}
+  (js/console.log "Root" this)
+  (js/console.log "Props of Root:" (comp/props this))
+  (dom/div :.container
+    (dom/h1 "Root component")
+    (dom/div
+      (ui-person-list friends)
+      (ui-person-list enemies))))
+
+(comment
+  (require '[com.fulcrologic.fulcro.algorithms.denormalize :as fdn])
+  (fdn/db->tree [{:friends [:list/label]}] (comp/get-initial-state Root {}) {})
+  (fdn/db->tree [{:enemies [:list/label {:list/people [:person/name]}]}] (comp/get-initial-state Root {}) {}))
+
+(comment
+  (comp/get-initial-state Person {:name "Paweł" :age 28})
+  )
