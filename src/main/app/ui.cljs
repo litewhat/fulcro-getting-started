@@ -13,7 +13,8 @@
 
 (defsc Person
   [this {:keys [:person/name :person/age]}]
-  {:initial-state (fn [{:keys [name age] :as params}] {:person/name name :person/age age})}
+  {:query         [:person/name :person/age]
+   :initial-state (fn [{:keys [name age] :as params}] {:person/name name :person/age age})}
   (dom/li
     (dom/h5 (str name " " "(age: " age ")"))))
 
@@ -21,7 +22,8 @@
 
 (defsc PersonList
   [this {:keys [:list/label :list/people]}]
-  {:initial-state (fn [{:keys [label]}]
+  {:query [:list/label {:list/people (comp/get-query Person)}]
+   :initial-state (fn [{:keys [label]}]
                     {:list/label  label
                      :list/people (case label
                                     "Friends" [(comp/get-initial-state Person {:name "Andrew" :age 26})
@@ -38,7 +40,9 @@
 
 (defsc Root
   [this {:keys [friends enemies ui/react-key]}]
-  {:initial-state (fn [params]
+  {:query         [{:friends (comp/get-query PersonList)}
+                   {:enemies (comp/get-query PersonList)}]
+   :initial-state (fn [params]
                     {:friends (comp/get-initial-state PersonList {:label "Friends"})
                      :enemies (comp/get-initial-state PersonList {:label "Enemies"})})}
   (js/console.log "Root" this)
@@ -49,11 +53,14 @@
       (ui-person-list friends)
       (ui-person-list enemies))))
 
+
+(comment
+  (comp/get-initial-state Person {:name "Paweł" :age 28}))
+
+(comment
+  (comp/get-query Person))
+
 (comment
   (require '[com.fulcrologic.fulcro.algorithms.denormalize :as fdn])
   (fdn/db->tree [{:friends [:list/label]}] (comp/get-initial-state Root {}) {})
   (fdn/db->tree [{:enemies [:list/label {:list/people [:person/name]}]}] (comp/get-initial-state Root {}) {}))
-
-(comment
-  (comp/get-initial-state Person {:name "Paweł" :age 28})
-  )
