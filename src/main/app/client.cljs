@@ -14,13 +14,27 @@
     (dom/p "My name is " name)
     (dom/p (str "Clicked: " clicks " times"))))
 
+(defsc Person
+  [this {:keys [:person/name :person/age]}]
+  {}
+  (dom/div
+    (dom/h3 "Person")
+    (dom/p
+      (dom/span (str "Name: " name))
+      (dom/br)
+      (dom/span (str "Age: " age)))))
+
+(def ui-person (comp/factory Person))
+
 (defsc Root
   [this props]
   {}
   (js/console.log "Props of Root:" (comp/props this))
   (dom/div :.container
     (dom/h1 "Root component")
-    (dom/div "I am the Root component!")))
+    (dom/p "I am the Root component!")
+    (dom/div
+      (ui-person {:person/name "Paweł" :person/age 28}))))
 
 (defn ^:export init []
   (app/mount! app Root "app")
