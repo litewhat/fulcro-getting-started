@@ -5,8 +5,22 @@
 
 (defonce app (app/fulcro-app))
 
-(defsc Root [this props]
-  (dom/div "I am the Root component!"))
+(defsc ClickCounter
+  [this {:keys [:counter/clicks :counter/name]}]
+  {}
+  (js/console.log this)
+  (dom/div {:id (str "ClickCounter-" name)}
+    (dom/h1 "Counter")
+    (dom/p "My name is " name)
+    (dom/p (str "Clicked: " clicks " times"))))
+
+(defsc Root
+  [this props]
+  {}
+  (js/console.log "Props of Root:" (comp/props this))
+  (dom/div :.container
+    (dom/h1 "Root component")
+    (dom/div "I am the Root component!")))
 
 (defn ^:export init []
   (app/mount! app Root "app")
