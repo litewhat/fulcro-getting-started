@@ -49,4 +49,17 @@
     (log/info "Calling list-resolver" xlist)
     (assoc xlist :list/people (mapv (fn [id] {:person/id id}) (:list/people xlist)))))
 
-(def resolvers [person-resolver list-resolver])
+(pc/defresolver friends-resolver
+  [env input]
+  {::pc/output [{:friends [:list/id]}]}
+  (log/info "Calling friends-resolver")
+  {:friends {:list/id :friends}})
+
+(pc/defresolver enemies-resolver
+  [env input]
+  {::pc/output [{:friends [:list/id]}]}
+  (log/info "Calling enemies-resolver")
+  {:enemies {:list/id :enemies}})
+
+
+(def resolvers [person-resolver list-resolver friends-resolver enemies-resolver])

@@ -25,4 +25,5 @@
   (api-parser [{[:list/id :friends] [:list/label {:list/people [:person/id]}]}])
   (api-parser [{[:list/id :friends] [:list/label {:list/people [:person/id :person/name :person/age]}]}])
   (api-parser [{[:list/id :friends] [:list/label {:list/people [:person/id :person/name :person/age]}]}
-               {[:list/id :enemies] [:list/label {:list/people [:person/id :person/name :person/age]}]}]))
+               {[:list/id :enemies] [:list/label {:list/people [:person/id :person/name :person/age]}]}])
+  (api-parser [{:friends [:list/id :list/label {:list/people [:person/id :person/name :person/age]}]}]))
