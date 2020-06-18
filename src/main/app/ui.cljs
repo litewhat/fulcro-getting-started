@@ -69,7 +69,11 @@
 
 (comment
   (comp/get-initial-state Person {:name "Paweł" :age 28})
-  (comp/get-query Person))
+  (comp/get-query Person)
+
+  (meta (comp/get-query PersonList))
+  (meta (comp/get-query Person))
+  )
 
 (comment
   ;; require
