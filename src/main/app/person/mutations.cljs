@@ -3,9 +3,12 @@
             [com.fulcrologic.fulcro.algorithms.merge :as merge]))
 
 (defmutation delete-person
-  "Delete the person with `name` from the list with `list-name`"
+  "Delete the person with `:person/id` from the list with `:list/id`"
   [{list-id :list/id person-id :person/id}]
   (action [{:keys [state]}]
-    (js/console.log "Running mutation" `delete-person)
-    (swap! state merge/remove-ident* [:person/id person-id] [:list/id list-id :list/people])))
+    (swap! state merge/remove-ident* [:person/id person-id] [:list/id list-id :list/people]))
+  ;; `remote` this is the name of remote server (see app.application namespace)
+  (remote [env]
+    (js/console.log env)
+    true))
 

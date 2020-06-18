@@ -2,9 +2,10 @@
   (:require [com.wsscode.pathom.core :as p]
             [com.wsscode.pathom.connect :as pc]
             [taoensso.timbre :as log]
-            [app.person.resolvers :as person]))
+            [app.person.resolvers :as p-res]
+            [app.person.mutations :as p-mut]))
 
-(def resolvers [person/resolvers])
+(def resolvers [p-res/resolvers p-mut/mutations])
 
 (def pathom-parser
   (p/parser {::p/env {::p/reader [p/map-reader
