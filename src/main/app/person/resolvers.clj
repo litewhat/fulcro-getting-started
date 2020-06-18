@@ -15,11 +15,11 @@
    99 {:person/id 99 :person/name "Paweł" :person/age 28}})
 
 (defonce list-table
-  {:friends {:list/id :friends
-             :list/label "Friends"
+  {:friends {:list/id     :friends
+             :list/label  "Friends"
              :list/people [1 2 3]}
-   :enemies {:list/id :enemies
-             :list/label "Enemies"
+   :enemies {:list/id     :enemies
+             :list/label  "Enemies"
              :list/people [4 5 6]}})
 
 (defn get-person-from-db
@@ -57,7 +57,7 @@
 
 (pc/defresolver enemies-resolver
   [env input]
-  {::pc/output [{:friends [:list/id]}]}
+  {::pc/output [{:enemies [:list/id]}]}
   (log/info "Calling enemies-resolver")
   {:enemies {:list/id :enemies}})
 

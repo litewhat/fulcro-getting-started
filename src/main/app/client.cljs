@@ -1,10 +1,13 @@
 (ns app.client
   (:require [com.fulcrologic.fulcro.application :as app]
+            [com.fulcrologic.fulcro.data-fetch :as df]
             [app.ui :as ui]
             [app.application :refer [app]]))
 
 (defn ^:export init []
   (app/mount! app ui/Root "app")
+  (df/load! app :friends ui/PersonList)
+  (df/load! app :enemies ui/PersonList)
   (js/console.log "Loaded"))
 
 (defn ^:export refresh []
