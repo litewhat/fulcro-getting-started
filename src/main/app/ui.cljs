@@ -13,34 +13,37 @@
     (dom/p (str "Clicked: " clicks " times"))))
 
 (defsc Person
-  [this {:keys [:person/name :person/age]} {:keys [onDelete]}]
-  {:query         [:person/name :person/age]
-   :initial-state (fn [{:keys [name age] :as params}] {:person/name name :person/age age})}
+  [this {:keys [:person/id :person/name :person/age] :as props} {:keys [onDelete]}]
+  {:query         [:person/id :person/name :person/age]
+   :ident         (fn [] [:person/id (:person/id props)])
+   :initial-state (fn [{:keys [id name age] :as params}] {:person/id id :person/name name :person/age age})}
   (js/console.log "Computed values:" (comp/get-computed this))
   (dom/li
     (dom/h5 (str name " " "(age: " age ")"))
-    (dom/button {:onClick #(onDelete name)} "X")))
+    (dom/button {:onClick #(onDelete id)} "X")))
 
-(def ui-person (comp/computed-factory Person {:keyfn :person/name}))
+(def ui-person (comp/computed-factory Person {:keyfn :person/id}))
 
 (defsc PersonList
-  [this {:keys [:list/label :list/people]}]
-  {:query [:list/label {:list/people (comp/get-query Person)}]
-   :initial-state (fn [{:keys [label]}]
-                    {:list/label  label
+  [this {:keys [:list/id :list/label :list/people] :as props}]
+  {:query         [:list/id :list/label {:list/people (comp/get-query Person)}]
+   :ident         (fn [] [:list/id (:list/id props)])
+   :initial-state (fn [{:keys [id label]}]
+                    {:list/id     id
+                     :list/label  label
                      :list/people (case label
-                                    "Friends" [(comp/get-initial-state Person {:name "Andrew" :age 26})
-                                               (comp/get-initial-state Person {:name "Diana" :age 18})]
-                                    "Enemies" [(comp/get-initial-state Person {:name "Jonathan" :age 45})
-                                               (comp/get-initial-state Person {:name "Daren" :age 25})]
+                                    "Friends" [(comp/get-initial-state Person {:id 1 :name "Andrew" :age 26})
+                                               (comp/get-initial-state Person {:id 2 :name "Diana" :age 18})]
+                                    "Enemies" [(comp/get-initial-state Person {:id 3 :name "Jonathan" :age 45})
+                                               (comp/get-initial-state Person {:id 4 :name "Daren" :age 25})]
                                     [])})}
-  (let [delete-person (fn [pname]
-                        (js/console.log "Asked to delete" pname)
-                        (comp/transact! this [(mut/delete-person {:list-name label :name pname})]))]
-   (dom/div
-     (dom/h4 label)
-     (dom/ul
-       (map (fn [p] (ui-person p {:onDelete delete-person})) people)))))
+  (let [delete-person (fn [person-id]
+                        (js/console.log "Asked to delete" person-id)
+                        (comp/transact! this [(mut/delete-person {:list id :item-id person-id})]))]
+    (dom/div
+      (dom/h4 label)
+      (dom/ul
+        (map (fn [p] (ui-person p {:onDelete delete-person})) people)))))
 
 (def ui-person-list (comp/factory PersonList))
 
@@ -49,8 +52,8 @@
   {:query         [{:friends (comp/get-query PersonList)}
                    {:enemies (comp/get-query PersonList)}]
    :initial-state (fn [params]
-                    {:friends (comp/get-initial-state PersonList {:label "Friends"})
-                     :enemies (comp/get-initial-state PersonList {:label "Enemies"})})}
+                    {:friends (comp/get-initial-state PersonList {:id 1 :label "Friends"})
+                     :enemies (comp/get-initial-state PersonList {:id 2 :label "Enemies"})})}
   (js/console.log "Root" this)
   (js/console.log "Props of Root:" (comp/props this))
   (dom/div :.container
@@ -69,6 +72,7 @@
   (comp/get-query Person))
 
 (comment
-  (require '[com.fulcrologic.fulcro.algorithms.denormalize :as fdn])
+  ;; require
+  ;; [com.fulcrologic.fulcro.algorithms.denormalize :as fdn]
   (fdn/db->tree [{:friends [:list/label]}] (comp/get-initial-state Root {}) {})
   (fdn/db->tree [{:enemies [:list/label {:list/people [:person/name]}]}] (comp/get-initial-state Root {}) {}))
