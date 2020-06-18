@@ -1,14 +1,11 @@
 (ns app.person.mutations
-  (:require [com.fulcrologic.fulcro.mutations :as m :refer [defmutation]]))
+  (:require [com.fulcrologic.fulcro.mutations :refer [defmutation]]
+            [com.fulcrologic.fulcro.algorithms.merge :as merge]))
 
 (defmutation delete-person
   "Delete the person with `name` from the list with `list-name`"
-  [{:keys [list item-id]}]
+  [{list-id :list/id person-id :person/id}]
   (action [{:keys [state]}]
-    #_(let [path (if (= "Friends" list-name)
-                 [:friends :list/people]
-                 [:enemies :list/people])
-          old-list (get-in @state path)
-          new-list (vec (filter #(not= name (:person/name %)) old-list))]
-      #_(swap! state assoc-in path new-list))
-    (println "Running mutation" `delete-person)))
+    (js/console.log "Running mutation" `delete-person)
+    (swap! state merge/remove-ident* [:person/id person-id] [:list/id list-id :list/people])))
+

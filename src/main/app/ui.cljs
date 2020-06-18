@@ -39,7 +39,7 @@
                                     [])})}
   (let [delete-person (fn [person-id]
                         (js/console.log "Asked to delete" person-id)
-                        (comp/transact! this [(mut/delete-person {:list id :item-id person-id})]))]
+                        (comp/transact! this [(mut/delete-person {:list/id id :person/id person-id})]))]
     (dom/div
       (dom/h4 label)
       (dom/ul
