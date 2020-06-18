@@ -1,19 +1,24 @@
 (ns user
-  (:require [clojure.tools.namespace.repl :as tools-ns :refer [set-refresh-dirs refresh]]
+  (:require [clojure.tools.namespace.repl :as tools-ns]
             [app.server :as server]))
 
 ;; https://github.com/clojure/tools.namespace
 
-(set-refresh-dirs "src/dev" "src/main")
+(tools-ns/set-refresh-dirs "src/dev" "src/main")
 
 (defn start []
   (server/start))
 
 (defn restart []
   (server/stop)
-  (refresh :after `user/start))
+  (tools-ns/refresh :after `user/start))
 
 (comment
   (start)
   (restart)
-  (server/stop))
+  (server/stop)
+
+  ;; If there are compiler errors
+  (tools-ns/refresh)
+  (start)
+  )
