@@ -21,4 +21,8 @@
 
 (comment
   (api-parser [{[:person/id 99] [:person/name]}])
-  (api-parser [{[:person/id 99] [:person/name :person/age]}]))
+  (api-parser [{[:person/id 99] [:person/name :person/age]}])
+  (api-parser [{[:list/id :friends] [:list/label {:list/people [:person/id]}]}])
+  (api-parser [{[:list/id :friends] [:list/label {:list/people [:person/id :person/name :person/age]}]}])
+  (api-parser [{[:list/id :friends] [:list/label {:list/people [:person/id :person/name :person/age]}]}
+               {[:list/id :enemies] [:list/label {:list/people [:person/id :person/name :person/age]}]}]))
