@@ -2,19 +2,26 @@
  :nrepl    {:port       9000
             :middleware []}
  :dev-http {8000 "classpath:public"}
- :builds   {:main {:target     :browser
-                   :output-dir "resources/public/js/main"
-                   :asset-path "/js/main"
-                   :modules    {:main {:init-fn app.client/init
-                                       :entries [app.client]}}
-                   :devtools   {:after-load app.client/refresh
-                                :preloads   [com.fulcrologic.fulcro.inspect.preload]}}
-            :test {:target   :browser-test
-                   :test-dir "target/test/browser"
-                   ;:ns-regexp "-test$" (optional)
-                   ;:runner-ns runner (optional)
-                   :devtools {:http-port 8021
-                              :http-root "target/test/browser"}}
-            :ci   {:target    :karma
-                   :output-to "target/test/karma/ci.js"
-                   :ns-regexp "-test$"}}}
+ :builds   {:main    {:target     :browser
+                      :output-dir "resources/public/js/main"
+                      :asset-path "/js/main"
+                      :modules    {:main {:init-fn app.client/init
+                                          :entries [app.client]}}
+                      :devtools   {:after-load app.client/refresh
+                                   :preloads   [com.fulcrologic.fulcro.inspect.preload]}}
+            :test    {:target   :browser-test
+                      :test-dir "target/test/browser"
+                      ;:ns-regexp "-test$" (optional)
+                      ;:runner-ns runner (optional)
+                      :devtools {:http-port 8021
+                                 :http-root "target/test/browser"}}
+            :ui-test {:target     :browser
+                      :output-dir "target/test/browser/js/main"
+                      :asset-path "/js/main"
+                      :modules    {:main {:init-fn app.ui-test-runner/init
+                                          :entries [app.ui-test-runner]}}
+                      :devtools   {:http-port 8022
+                                   :http-root "target/test/browser"}}
+            :ci      {:target    :karma
+                      :output-to "target/test/karma/ci.js"
+                      :ns-regexp "-test$"}}}

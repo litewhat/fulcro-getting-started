@@ -1,6 +1,7 @@
 (ns app.example-test
   (:require [clojure.string :as str]
-            [cljs.test :refer [deftest is testing]]))
+            [cljs.test :refer [deftest is testing]]
+            [app.client]))
 
 (deftest example-test
   (testing "numbers-quality"
