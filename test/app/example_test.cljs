@@ -9,3 +9,8 @@
 
   (testing "splitting string"
     (is (= ["a" "b" "c"] (filterv #(not= "" %) (str/split "abc" #""))))))
+
+(deftest dom-test
+  (testing "root component"
+    (let [selector "#app .container:first-child h1:first-child"]
+      (is (= "Root component" (.-textContent (.querySelector js/document selector)))))))
