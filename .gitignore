@@ -3,4 +3,5 @@
 /.shadow-cljs/
 /node_modules/
 /resources/public/js/main
+/target
 fulcro-getting-started.iml
