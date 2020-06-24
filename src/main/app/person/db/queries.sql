@@ -68,6 +68,6 @@ select * from person;
 -- :name get-person-by-id
 -- :command :query
 -- :result :one
--- :doc Select all records from person table
+-- :doc Select person with given id
 select * from person
 where id = :id;
