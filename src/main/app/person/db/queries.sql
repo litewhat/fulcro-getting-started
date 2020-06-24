@@ -99,6 +99,13 @@ select * from person_list;
 insert into person_list_people (list_id, person_id)
 values (:list_id, :person_id);
 
+-- :name add-people-to-list
+-- :command :execute
+-- :result :affected
+-- :doc Add people to person list
+insert into person_list_people (list_id, person_id)
+values :tuple*:people
+
 -- :name get-people-by-list-id
 -- :command :query
 -- :result :many

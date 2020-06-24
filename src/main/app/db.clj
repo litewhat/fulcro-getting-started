@@ -49,7 +49,7 @@
   (person-queries/insert-person db-spec {:name "Paweł" :age 28})
   (count (person-queries/get-all-people db-spec))
   (person-queries/get-all-people db-spec)
-  (person-queries/get-person-by-id db-spec {:id 3})
+  (person-queries/get-person-by-id db-spec {:id 6})
 
   (person-queries/insert-person-list db-spec {:id (str :friends)})
   (person-queries/insert-person-list db-spec {:id (str :enemies)})
@@ -58,7 +58,7 @@
    (map #(update % :id read-string) res))
 
   (person-queries/get-person-list-by-id db-spec {:id (str :friends)})
-  (person-queries/get-person-list-by-id db-spec {:id (str :friends)})
+  (person-queries/get-person-list-by-id db-spec {:id (str :enemies)})
 
   (person-queries/add-person-to-list db-spec {:list_id (str :friends)
                                               :person_id 1})
@@ -68,6 +68,11 @@
                                               :person_id 5})
 
   (clojure.pprint/pprint
-   (let [res (person-queries/get-people-by-list-id db-spec {:list_id (str :friends)})]
+   (let [res (person-queries/get-people-by-list-id db-spec {:list_id (str :enemies)})]
      (map #(update % :list_id read-string) res)))
+
+  (let [list-id (str :enemies)
+        people-ids [2 4 6]
+        res (person-queries/add-people-to-list db-spec {:people (mapv (partial vector list-id) people-ids)})]
+    res)
   )
