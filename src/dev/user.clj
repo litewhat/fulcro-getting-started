@@ -9,14 +9,17 @@
 (defn start []
   (server/start))
 
+(defn stop []
+  (server/stop))
+
 (defn restart []
   (server/stop)
   (tools-ns/refresh :after `user/start))
 
 (comment
   (start)
+  (stop)
   (restart)
-  (server/stop)
 
   ;; If there are compiler errors
   (tools-ns/refresh)
