@@ -7,11 +7,14 @@
   drop-person-table
   create-person-list-table
   drop-person-list-table
-  create-person-list-person-table
-  drop-person-list-person-table
+  create-person-list-people-table
+  drop-person-list-people-table
   insert-person
   get-all-people
-  get-person-by-id)
+  get-person-by-id
+  insert-person-list
+  get-person-list-by-id
+  get-all-person-lists)
 
 (def ^:private query-file "app/person/db/queries.sql")
 

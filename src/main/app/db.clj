@@ -26,12 +26,12 @@
   (person-queries/create-person-list-table db-spec)
   (log/debugf "Created %s table" "person_list")
 
-  (person-queries/create-person-list-person-table db-spec)
+  (person-queries/create-person-list-people-table db-spec)
   (log/debugf "Created %s table" "person_list_person"))
 
 (defn tear-down-tables!
   [db-spec]
-  (person-queries/drop-person-list-person-table db-spec)
+  (person-queries/drop-person-list-people-table db-spec)
   (log/debugf "Dropped %s table" "person_list_person")
 
   (person-queries/drop-person-list-table db-spec)
@@ -50,4 +50,10 @@
   (count (person-queries/get-all-people db-spec))
   (person-queries/get-all-people db-spec)
   (person-queries/get-person-by-id db-spec {:id 3})
-  )
+
+  (person-queries/insert-person-list db-spec {:id (str :friends)})
+  (person-queries/insert-person-list db-spec {:id (str :enemies)})
+  (let [res (person-queries/get-all-person-lists db-spec)]
+   (map #(update % :id read-string) res))
+  (person-queries/get-person-list-by-id db-spec {:id (str :friends)})
+  (person-queries/get-person-list-by-id db-spec {:id (str :friends)}))
