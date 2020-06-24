@@ -1,6 +1,7 @@
 (ns app.db
   (:require [hugsql.core :as hc]
-            [hugsql.adapter.clojure-java-jdbc :as had]))
+            [hugsql.adapter.clojure-java-jdbc :as had]
+            [taoensso.timbre :as log]))
 
 (def db-spec
   {:dbtype   "postgres"
@@ -14,7 +15,32 @@
   (hc/set-adapter! (had/hugsql-adapter-clojure-java-jdbc))
   (hc/def-db-fns "app/person/db/queries.sql"))
 
+(defn set-up-tables!
+  [db-spec]
+  (create-person-table db-spec)
+  (log/debugf "Created %s table" "person")
+
+  (create-person-list-table db-spec)
+  (log/debugf "Created %s table" "person_list")
+
+  (create-person-list-person-table db-spec)
+  (log/debugf "Created %s table" "person_list_person"))
+
+(defn tear-down-tables!
+  [db-spec]
+  (drop-person-list-person-table db-spec)
+  (log/debugf "Dropped %s table" "person_list_person")
+
+  (drop-person-list-table db-spec)
+  (log/debugf "Dropped %s table" "person_list")
+
+  (drop-person-table db-spec)
+  (log/debugf "Dropepd %s table" "person"))
+
 (comment
   (init!)
-  (create-person-table db-spec)
-  (drop-person-table db-spec))
+
+  (set-up-tables! db-spec)
+  (tear-down-tables! db-spec)
+
+  )
