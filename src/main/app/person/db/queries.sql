@@ -91,3 +91,17 @@ where id = :id;
 -- :result :many
 -- :doc Select all records from person table
 select * from person_list;
+
+-- :name add-person-to-list
+-- :command :execute
+-- :result :affected
+-- :doc Adds person to person list
+insert into person_list_people (list_id, person_id)
+values (:list_id, :person_id);
+
+-- :name get-people-by-list-id
+-- :command :query
+-- :result :many
+-- :doc Select records representing people in person list
+select * from person_list_people
+where list_id = :list_id;

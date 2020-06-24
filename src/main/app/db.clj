@@ -53,7 +53,21 @@
 
   (person-queries/insert-person-list db-spec {:id (str :friends)})
   (person-queries/insert-person-list db-spec {:id (str :enemies)})
+
   (let [res (person-queries/get-all-person-lists db-spec)]
    (map #(update % :id read-string) res))
+
   (person-queries/get-person-list-by-id db-spec {:id (str :friends)})
-  (person-queries/get-person-list-by-id db-spec {:id (str :friends)}))
+  (person-queries/get-person-list-by-id db-spec {:id (str :friends)})
+
+  (person-queries/add-person-to-list db-spec {:list_id (str :friends)
+                                              :person_id 1})
+  (person-queries/add-person-to-list db-spec {:list_id (str :friends)
+                                              :person_id 3})
+  (person-queries/add-person-to-list db-spec {:list_id (str :friends)
+                                              :person_id 5})
+
+  (clojure.pprint/pprint
+   (let [res (person-queries/get-people-by-list-id db-spec {:list_id (str :friends)})]
+     (map #(update % :list_id read-string) res)))
+  )
