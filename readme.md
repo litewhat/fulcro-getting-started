@@ -1,10 +1,27 @@
 Run services:
 
 ```shell script
-docker-compose up
+$ docker-compose up
 ```
 
 Check database connection via psql:
 ```shell script
-psql -h localhost -p 15432 -U fulcro_getting_started
+$ psql -h localhost -p 15432 -U fulcro_getting_started
 ```
+
+Run build watcher for frontend app:
+```shell script
+$ shadow-cljs watch main
+```
+
+Start Clojure REPL:
+```shell script
+$ clj -A:dev
+```
+
+Start application within `user` namespace:
+```clojure
+user=> (start)
+```
+
+Open browser and navigate to `localhost:3000`.
