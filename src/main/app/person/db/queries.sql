@@ -51,3 +51,23 @@ create table person_list_person (
 -- :result :raw
 -- :doc Drop person_list_person table
 drop table if exists person_list_person restrict;
+
+-- :name insert-person
+-- :command :execute
+-- :result :affected
+-- :doc Insert person record
+insert into person (name, age)
+values (:name, :age);
+
+-- :name get-all-people
+-- :command :query
+-- :result :many
+-- :doc Select all records from person table
+select * from person;
+
+-- :name get-person-by-id
+-- :command :query
+-- :result :one
+-- :doc Select all records from person table
+select * from person
+where id = :id;

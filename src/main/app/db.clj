@@ -13,6 +13,7 @@
    :password "pass123"})
 
 (defn init! []
+  (log/debug "Initalizing hugsql adapter")
   (hc/set-adapter! (had/hugsql-adapter-clojure-java-jdbc)))
 
 ;; migrations
@@ -41,6 +42,12 @@
 
 (comment
   (init!)
-
   (set-up-tables! db-spec)
   (tear-down-tables! db-spec))
+
+(comment
+  (person-queries/insert-person db-spec {:name "Paweł" :age 28})
+  (count (person-queries/get-all-people db-spec))
+  (person-queries/get-all-people db-spec)
+  (person-queries/get-person-by-id db-spec {:id 3})
+  )
