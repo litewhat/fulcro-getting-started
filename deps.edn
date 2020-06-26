@@ -1,8 +1,11 @@
 {:paths   ["src/main" "resources"]
- :deps    {org.clojure/clojure                            {:mvn/version "1.10.1"}
+ :deps    {
+           ;; clojure
+           org.clojure/clojure                            {:mvn/version "1.10.1"}
+
+           ;; fulcro frontend and backend
            com.fulcrologic/fulcro                         {:mvn/version "3.0.10"}
            com.wsscode/pathom                             {:mvn/version "2.2.15"}
-           com.taoensso/timbre                            {:mvn/version "4.10.0"}
 
            ;; http server
            ring/ring-core                                 {:mvn/version "1.6.3"}
@@ -11,7 +14,12 @@
            ;; database
            com.layerware/hugsql-core                      {:mvn/version "0.5.1"}
            com.layerware/hugsql-adapter-clojure-java-jdbc {:mvn/version "0.5.1"}
-           org.postgresql/postgresql                      {:mvn/version "42.2.2"}}
+           org.postgresql/postgresql                      {:mvn/version "42.2.2"}
+
+           ;; other
+           com.taoensso/timbre                            {:mvn/version "4.10.0"}
+           aero                                           {:mvn/version "1.1.6"}
+           }
  :aliases {:dev       {:extra-paths ["src/dev"]
                        :extra-deps  {org.clojure/clojurescript   {:mvn/version "1.10.742"}
                                      org.clojure/tools.namespace {:mvn/version "0.2.11"}

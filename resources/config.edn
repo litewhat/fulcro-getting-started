@@ -1,0 +1,3 @@
+{:database {:name #or [#env DATABASE_NAME "fulcro_getting_started"]
+            :user #or [#env DATABASE_USER "fulcro_getting_started"]
+            :password #or [#env DATABASE_PASSWORD "fulcro_getting_started_pass123"]}}

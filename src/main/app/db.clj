@@ -1,16 +1,17 @@
 (ns app.db
   (:require [hugsql.core :as hc]
             [hugsql.adapter.clojure-java-jdbc :as had]
-            [app.person.db.queries :as person-queries]
-            [taoensso.timbre :as log]))
+            [taoensso.timbre :as log]
+            [app.config :as cfg]
+            [app.person.db.queries :as person-queries]))
 
 (def db-spec
   {:dbtype   "postgres"
    :host     "localhost"
    :port     15432
-   :dbname   "fulcro_getting_started"
-   :user     "fulcro_getting_started"
-   :password "pass123"})
+   :dbname   (get-in cfg/app-config [:database :name])
+   :user     (get-in cfg/app-config [:database :user])
+   :password (get-in cfg/app-config [:database :password])})
 
 (defn init! []
   (log/debug "Initalizing hugsql adapter")
@@ -39,11 +40,6 @@
 
   (person-queries/drop-person-table db-spec)
   (log/debugf "Dropepd %s table" "person"))
-
-(comment
-  (init!)
-  (set-up-tables! db-spec)
-  (tear-down-tables! db-spec))
 
 (comment
   (person-queries/insert-person db-spec {:name "Paweł" :age 28})
