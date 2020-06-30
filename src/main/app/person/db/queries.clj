@@ -21,8 +21,9 @@
 
 (def ^:private query-file "app/person/db/queries.sql")
 
-(log/debug "Initalizing person queries")
+(log/debug "Initializing person queries")
 (hc/def-db-fns query-file)
+(log/info "Person queries initialized")
 
 (comment
   (clojure.pprint/pprint (hc/map-of-db-fns "app/person/db/queries.sql")))
