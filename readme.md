@@ -1,3 +1,31 @@
+
+### Build
+
+Build docker image for application:
+```shell script
+$ docker build --tag=fulcro_getting_started:alpha .
+```
+
+### Test
+Ensure whether required images are built:
+```shell script
+$ docker-compose build
+```
+
+Run tests in docker container:
+```shell script
+$ docker-compose run --rm app clojure -A:dev:test:runner
+```
+
+You can also run tests in one command:
+```shell script
+$ ./scripts/test-clj.sh
+```
+
+### Run
+
+#### Locally
+
 Generate `.env` file for `docker-compose` on the basis of `resources/config.edn`:
 ```shell script
 $ clj -m app.config.cli generate --target docker --output-file .env
@@ -29,3 +57,9 @@ user=> (start)
 ```
 
 Open browser and navigate to `localhost:3000`.
+
+#### Docker
+
+```shell script
+$ docker-compose run --rm app bash
+```
