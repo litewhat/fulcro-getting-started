@@ -15,13 +15,9 @@
        (string/join "\n")))
 
 (defn generate-docker-env-file!
-  [config]
+  [config file-path]
   (let [mapping {"DATABASE_NAME"     [:database :name]
                  "DATABASE_USER"     [:database :user]
                  "DATABASE_PASSWORD" [:database :password]}
         content (docker-env-file-content config mapping)]
-    (spit ".env" content)))
-
-(comment
-  ;; TODO: Move to script
-  (generate-docker-env-file! app-config))
+    (spit file-path content)))

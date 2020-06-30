@@ -4,4 +4,5 @@
 /node_modules/
 /resources/public/js/main
 /target
+.env
 fulcro-getting-started.iml

@@ -2,6 +2,8 @@
  :deps    {
            ;; clojure
            org.clojure/clojure                            {:mvn/version "1.10.1"}
+           org.clojure/core.match                         {:mvn/version "1.0.0"}
+           org.clojure/tools.cli                          {:mvn/version "1.0.194"}
 
            ;; fulcro frontend and backend
            com.fulcrologic/fulcro                         {:mvn/version "3.0.10"}
@@ -18,8 +20,7 @@
 
            ;; other
            com.taoensso/timbre                            {:mvn/version "4.10.0"}
-           aero                                           {:mvn/version "1.1.6"}
-           }
+           aero                                           {:mvn/version "1.1.6"}}
  :aliases {:dev       {:extra-paths ["src/dev"]
                        :extra-deps  {org.clojure/clojurescript   {:mvn/version "1.10.742"}
                                      org.clojure/tools.namespace {:mvn/version "0.2.11"}

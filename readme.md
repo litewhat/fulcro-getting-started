@@ -1,5 +1,9 @@
-Run services:
+Generate `.env` file for `docker-compose` on the basis of `resources/config.edn`:
+```shell script
+$ clj -m app.config.cli generate --target docker --output-file .env
+```
 
+Run services:
 ```shell script
 $ docker-compose up
 ```
