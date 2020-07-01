@@ -104,7 +104,7 @@ values (:list_id, :person_id);
 -- :result :affected
 -- :doc Add people to person list
 insert into person_list_people (list_id, person_id)
-values :tuple*:people
+values :tuple*:people;
 
 -- :name get-people-by-list-id
 -- :command :query

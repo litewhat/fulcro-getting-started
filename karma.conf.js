@@ -9,7 +9,7 @@ module.exports = function(config) {
         logLevel: config.LOG_INFO,
         client: {
             args: ['shadow.test.karma.init'],
-            singleRun:true
+            singleRun: true
         }
     });
 };
