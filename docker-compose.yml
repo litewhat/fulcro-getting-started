@@ -19,7 +19,3 @@ services:
       args:
         author: litewhat
     image: fulcro_getting_started:alpha
-    volumes:
-      - type: bind
-        source: ./
-        target: /app/
