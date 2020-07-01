@@ -7,8 +7,8 @@
 
 (def conn-spec
   {:dbtype   "postgres"
-   :host     "localhost"
-   :port     15432
+   :host     (get-in cfg/app-config [:database :hostname])
+   :port     (get-in cfg/app-config [:database :port])
    :dbname   (get-in cfg/app-config [:database :name])
    :user     (get-in cfg/app-config [:database :user])
    :password (get-in cfg/app-config [:database :password])})

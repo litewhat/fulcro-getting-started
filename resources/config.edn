@@ -1,3 +1,5 @@
-{:database {:name #or [#env DATABASE_NAME "fulcro_getting_started"]
-            :user #or [#env DATABASE_USER "fulcro_getting_started"]
+{:database {:hostname #or [#env DATABASE_HOSTNAME "localhost"]
+            :port     #long #or [#env DATABASE_PORT 15432]
+            :name     #or [#env DATABASE_NAME "fulcro_getting_started"]
+            :user     #or [#env DATABASE_USER "fulcro_getting_started"]
             :password #or [#env DATABASE_PASSWORD "fulcro_getting_started_pass123"]}}
