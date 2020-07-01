@@ -39,4 +39,4 @@
   (log/debugf "Dropped %s table" "person_list")
 
   (person-queries/drop-person-table db-spec)
-  (log/debugf "Dropepd %s table" "person"))
+  (log/debugf "Dropped %s table" "person"))
