@@ -19,17 +19,12 @@ $ ./scripts/test-clj.sh
 
 #### Locally
 
-Generate `.env` file for `docker-compose` on the basis of `resources/config.edn`:
+Run database for `dev` environment:
 ```shell script
-$ clj -m app.config.cli generate --target docker --output-file .env
+$ ./scripts/run-dev-db.sh
 ```
 
-Run database:
-```shell script
-$ docker-compose up database
-```
-
-Check database connection via psql:
+You can check database connection via psql:
 ```shell script
 $ psql -h localhost -p 15432 -U <username_from_config>
 ```
