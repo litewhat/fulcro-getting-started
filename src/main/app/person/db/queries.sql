@@ -59,6 +59,13 @@ drop table if exists person_list_people restrict;
 insert into person (name, age)
 values (:name, :age);
 
+-- :name batch-insert-person
+-- :command :execute
+-- :result :affected
+-- :doc Insert many person records
+insert into person (name, age)
+values :tuple*:people;
+
 -- :name get-all-people
 -- :command :query
 -- :result :many
@@ -75,9 +82,16 @@ where id = :id;
 -- :name insert-person-list
 -- :command :execute
 -- :result :affected
--- :doc Insert person list record
+-- :doc Insert person_list record
 insert into person_list (id)
 values (:id);
+
+-- :name batch-insert-person-list
+-- :command :execute
+-- :result :affected
+-- :doc Insert many person_list records
+insert into person_list (id)
+values :tuple*:person_lists;
 
 -- :name get-person-list-by-id
 -- :command :query

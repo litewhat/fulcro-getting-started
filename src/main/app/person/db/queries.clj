@@ -10,9 +10,11 @@
   create-person-list-people-table
   drop-person-list-people-table
   insert-person
+  batch-insert-person
   get-all-people
   get-person-by-id
   insert-person-list
+  batch-insert-person-list
   get-person-list-by-id
   get-all-person-lists
   add-person-to-list
