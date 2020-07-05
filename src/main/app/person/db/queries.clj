@@ -17,7 +17,8 @@
   get-all-person-lists
   add-person-to-list
   get-people-by-list-id
-  add-people-to-list)
+  add-people-to-list
+  remove-person-from-list)
 
 (def ^:private query-file "app/person/db/queries.sql")
 

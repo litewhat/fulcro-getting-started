@@ -112,3 +112,10 @@ values :tuple*:people;
 -- :doc Select records representing people in person list
 select * from person_list_people
 where list_id = :list_id;
+
+-- :name remove-person-from-list
+-- :command :execute
+-- :result :affected
+-- :doc Removes person from person list
+delete from person_list_people
+where list_id = :list_id and person_id = :person_id;

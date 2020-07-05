@@ -109,11 +109,48 @@
           fres       (sut/get-people-by-list-id db/conn-spec {:list_id (str :friends)})
           friends    (map #(update % :list_id read-string) fres)]
       (is (= 2 affected))
-      (is (= 5 (count friends))))
+      (is (= 5 (count friends)))
+      (is (= #{2 4 6 8 9} (set (map :person_id friends)))))
 
     (let [list-id    (str :friends)
           people-ids [8 9]]
      (is (thrown-with-msg?
            java.sql.BatchUpdateException
            #"ERROR: duplicate key value violates unique constraint \"person_list_people_pkey\""
-           (sut/add-people-to-list db/conn-spec {:people (mapv (partial vector list-id) people-ids)}))))))
+           (sut/add-people-to-list db/conn-spec {:people (mapv (partial vector list-id) people-ids)})))))
+
+  (testing "removing person form list when both exists"
+    (let [friends-affected (sut/remove-person-from-list db/conn-spec {:list_id   (str :friends)
+                                                                      :person_id 6})
+          enemies-affected (sut/remove-person-from-list db/conn-spec {:list_id   (str :enemies)
+                                                                      :person_id 7})
+
+          fres             (sut/get-people-by-list-id db/conn-spec {:list_id (str :friends)})
+          friends          (map #(update % :list_id read-string) fres)
+
+          eres             (sut/get-people-by-list-id db/conn-spec {:list_id (str :enemies)})
+          enemies          (map #(update % :list_id read-string) eres)]
+      (is (= 1 friends-affected))
+      (is (= 1 enemies-affected))
+
+      (is (= 4 (count friends)))
+      (is (= 3 (count enemies)))
+      (is (= #{2 4 8 9} (set (map :person_id friends))))
+      (is (= #{1 3 5} (set (map :person_id enemies))))))
+
+  (testing "removing person form list when list does not exist"
+    (let [list-id  (str :non-existent-list)
+          affected (sut/remove-person-from-list db/conn-spec {:list_id   list-id
+                                                              :person_id 6})
+          res      (sut/get-people-by-list-id db/conn-spec {:list_id list-id})]
+      (is (zero? affected))
+      (is (empty? res))))
+
+  (testing "removing person form list when person does not exist"
+    (let [friends-affected (sut/remove-person-from-list db/conn-spec {:list_id   (str :friends)
+                                                                      :person_id 99999})
+          fres             (sut/get-people-by-list-id db/conn-spec {:list_id (str :friends)})
+          friends          (map #(update % :list_id read-string) fres)]
+      (is (zero? friends-affected))
+      (is (= 4 (count friends)))
+      (is (= #{2 4 8 9} (set (map :person_id friends)))))))
