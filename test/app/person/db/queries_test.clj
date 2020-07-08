@@ -56,10 +56,9 @@
 (deftest ^:integration insert-person-list-test
   (testing "insert person list"
     (sut/insert-person-list db/conn-spec {:id (str :unknown)})
-    (let [res    (sut/get-all-person-lists db/conn-spec)
-          plists (map #(update % :id read-string) res)]
-      (is (= 3 (count plists)))
-      (is (= #{:friends :enemies :unknown} (set (map :id plists)))))
+    (let [person-lists (map #(update % :id read-string) (sut/get-all-person-lists db/conn-spec))]
+      (is (= 3 (count person-lists)))
+      (is (= #{:friends :enemies :unknown} (set (map :id person-lists)))))
 
     (is (thrown-with-msg?
           java.sql.BatchUpdateException
@@ -92,7 +91,7 @@
           #"ERROR: duplicate key value violates unique constraint \"person_list_people_pkey\""
           (sut/add-person-to-list db/conn-spec {:list_id (str :enemies) :person_id 2})))))
 
-(deftest add-people-to-list-test
+(deftest ^:integration add-people-to-list-test
   (testing "adding person to list at one go"
     (sut/insert-person-list db/conn-spec {:id (str :unknown)})
     (let [list-id      (str :unknown)
@@ -133,3 +132,32 @@
           friends          (map #(update % :list_id read-string) (sut/get-people-by-list-id db/conn-spec {:list_id (str :friends)}))]
       (is (zero? friends-affected))
       (is (= #{1 3} (set (map :person_id friends)))))))
+
+(deftest ^:integration batch-insert-person-test
+  (let [people-tuples [["TestBatch1" 15] ["TestBatch2" 35]]
+        people-before (sut/get-all-people db/conn-spec)
+        inserted      (sut/batch-insert-person db/conn-spec {:people people-tuples})
+        people-after  (sut/get-all-people db/conn-spec)]
+    (is (= (count people-tuples) inserted))
+    (is (= (+ inserted (count people-before)) (count people-after)))))
+
+(deftest ^:integration batch-insert-person-list-test
+  (testing "inserting many lists at one go"
+    (let [list-tuples  (map (comp vector str) #{:kind :unpleasant})
+          lists-before (map #(update % :id read-string) (sut/get-all-person-lists db/conn-spec))
+          inserted     (sut/batch-insert-person-list db/conn-spec {:person_lists list-tuples})
+          lists-after  (map #(update % :id read-string) (sut/get-all-person-lists db/conn-spec))]
+
+      (is (= 2 inserted))
+      (is (= #{:friends :enemies} (set (map :id lists-before))))
+      (is (= #{:friends :enemies :kind :unpleasant} (set (map :id lists-after))))
+
+      (testing "inserting many lists when some of them already exist"
+        (let [tuples       (map (comp vector str) #{:kind :unpleasant :tall :small})
+              lists-before (map #(update % :id read-string) (sut/get-all-person-lists db/conn-spec))]
+          (is (thrown-with-msg?
+                java.sql.BatchUpdateException
+                #"ERROR: duplicate key value violates unique constraint \"person_list_pkey\""
+                (sut/batch-insert-person-list db/conn-spec {:person_lists tuples})))
+          (let [lists-after (map #(update % :id read-string) (sut/get-all-person-lists db/conn-spec))]
+            (is (= lists-before lists-after))))))))
