@@ -1,5 +1,6 @@
 (ns db.seed
-  (:require [app.db :as db]
+  (:require [taoensso.timbre :as log]
+            [app.db :as db]
             [app.person.db.queries :as person-queries]))
 
 (def people
@@ -25,11 +26,14 @@
 
 (defn seed! [db-conn]
   (person-queries/batch-insert-person db-conn {:people people})
+  (log/debug "Seeded 'person' table")
   (person-queries/batch-insert-person-list db-conn {:person_lists person-lists})
+  (log/debug "Seeded 'person_list' table")
   (doseq [[list-id people-ids] person-list-people]
     (person-queries/add-people-to-list
       db-conn
-      {:people (mapv (partial vector (str list-id)) people-ids)})))
+      {:people (mapv (partial vector (str list-id)) people-ids)}))
+  (log/debug "Seeded 'person_list_people' table"))
 
 (comment
   (seed! db/conn-spec))

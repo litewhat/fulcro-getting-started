@@ -44,7 +44,7 @@ Start application within `user` namespace:
 user=> (start)
 ```
 
-Open browser and navigate to `localhost:3000`.
+Open browser and navigate to `localhost:3000/index.html`.
 
 #### Docker
 
