@@ -5,10 +5,10 @@
 
 (def people
   [["Paweł" 28]
-   ["Josh" 34]
    ["Andrea" 25]
-   ["Eduardo" 26]
+   ["Josh" 34]
    ["Richard" 60]
+   ["Eduardo" 26]
    ["Michael" 64]
    ["Sarah" 18]
    ["Jacob" 16]

@@ -12,27 +12,35 @@
 (tools-ns/set-refresh-dirs "src/dev" "src/main")
 
 (defn start []
-  (server/start)
-  ;; db start
-  (db/init!)
-  (db/set-up-tables! db/conn-spec)
-  )
+  (server/start))
 
 (defn stop []
-  (server/stop)
-  ;; db-stop
-  (db/tear-down-tables! db/conn-spec)
-  )
+  (server/stop))
 
 (defn restart []
   (stop)
   (tools-ns/refresh :after `user/start))
 
+(defn start-db []
+  (db/init!)
+  (db/set-up-tables! db/conn-spec)
+  (dbs/seed! db/conn-spec))
+
+(defn stop-db []
+  (db/tear-down-tables! db/conn-spec))
+
+(defn restart-db []
+  (stop-db)
+  (tools-ns/refresh :after `user/start-db))
+
 (comment
   (start)
-  (dbs/seed! db/conn-spec)
   (stop)
   (restart)
+
+  (start-db)
+  (stop-db)
+  (restart-db)
 
   ;; If there are compiler errors
   (tools-ns/refresh)
