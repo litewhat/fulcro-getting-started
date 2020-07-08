@@ -90,8 +90,9 @@
     (is (thrown-with-msg?
           java.sql.BatchUpdateException
           #"ERROR: duplicate key value violates unique constraint \"person_list_people_pkey\""
-          (sut/add-person-to-list db/conn-spec {:list_id (str :enemies) :person_id 2}))))
+          (sut/add-person-to-list db/conn-spec {:list_id (str :enemies) :person_id 2})))))
 
+(deftest add-people-to-list-test
   (testing "adding person to list at one go"
     (sut/insert-person-list db/conn-spec {:id (str :unknown)})
     (let [list-id      (str :unknown)
