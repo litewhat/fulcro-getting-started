@@ -4,22 +4,24 @@
 
 (def people
   [["Paweł" 28]
-   ["John" 28]
-   ["Julia" 25]
-   ["Josh" 32]
-   ["Anthony" 30]
-   ["Lucian" 65]
-   ["Rebecca" 46]
-   ["Tom" 55]
-   ["Adam" 40]
-   ["Eve" 40]])
+   ["Josh" 34]
+   ["Andrea" 25]
+   ["Eduardo" 26]
+   ["Richard" 60]
+   ["Michael" 64]
+   ["Sarah" 18]
+   ["Jacob" 16]
+   ["Marc" 24]
+   ["Serge" 78]
+   ["Luc" 42]
+   ["Andy" 14]])
 
 (def person-lists
   (map (comp vector str) [:friends :enemies]))
 
 (def person-list-people
-  {:friends #{1 3 5 7}
-   :enemies #{2 4 6 8}})
+  {:friends #{1 3 5}
+   :enemies #{2 4 6}})
 
 (defn seed! [db-conn]
   (person-queries/batch-insert-person db-conn {:people people})
