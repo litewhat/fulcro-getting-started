@@ -1,5 +1,6 @@
 (ns user
   (:require [clojure.tools.namespace.repl :as tools-ns]
+            [clojure.tools.trace :as trace]
             [clojure.java.shell :as shell]
             [db.seed :as dbs]
             [app.db :as db]
@@ -21,26 +22,26 @@
   (stop)
   (tools-ns/refresh :after `user/start))
 
-(defn start-db []
+(defn setup-db []
   (db/init!)
   (db/set-up-tables! db/conn-spec)
   (dbs/seed! db/conn-spec))
 
-(defn stop-db []
+(defn teardown-db []
   (db/tear-down-tables! db/conn-spec))
 
-(defn restart-db []
-  (stop-db)
-  (tools-ns/refresh :after `user/start-db))
+(defn reset-db []
+  (teardown-db)
+  (tools-ns/refresh :after `user/setup-db))
 
 (comment
   (start)
   (stop)
   (restart)
 
-  (start-db)
-  (stop-db)
-  (restart-db)
+  (setup-db)
+  (teardown-db)
+  (reset-db)
 
   ;; If there are compiler errors
   (tools-ns/refresh)
@@ -101,6 +102,10 @@
     {:list_id (str :friends)
      :person_id 1})
   )
+
+(comment
+  (trace/trace-vars #'com.fulcrologic.fulcro.server.api-middleware/handle-api-request)
+  (trace/untrace-vars #'com.fulcrologic.fulcro.server.api-middleware/handle-api-request))
 
 (comment
   (shell/sh "pwd")
