@@ -1,17 +1,22 @@
 (ns app.ui
-  (:require [com.fulcrologic.fulcro.components :as comp :refer [defsc]]
-            [com.fulcrologic.fulcro.dom :as dom]
-            [app.person.mutations :as mut]
+  (:require [com.fulcrologic.fulcro.algorithms.data-targeting :as targeting]
+            [com.fulcrologic.fulcro.components :as comp :refer [defsc]]
             [com.fulcrologic.fulcro.data-fetch :as df]
-            [com.fulcrologic.fulcro.algorithms.data-targeting :as targeting]))
+            [com.fulcrologic.fulcro.dom :as dom]
+            [app.person.mutations :as mut]))
 
 (defsc ClickCounter
-  [this {:keys [:counter/clicks :counter/name]}]
-  {}
-  (dom/div {:id (str "ClickCounter-" name)}
-    (dom/h1 "Counter")
-    (dom/p "My name is " name)
-    (dom/p (str "Clicked: " clicks " times"))))
+  [this {:keys [:counter/id :counter/clicks] :as props}]
+  {:query         [:counter/id :counter/clicks]
+   :ident         (fn [] [:counter/id (:counter/id props)])
+   :initial-state {:counter/id 0 :counter/clicks 0}}
+  (dom/div {:id (str "ClickCounter-" id)}
+    (dom/p "Identifier: " id)
+    (dom/p "Clicked: " (dom/b clicks) " times")
+    (dom/button {:onClick #(comp/transact! this [(mut/increase-counter {:counter/id id})])}
+      "Click!")))
+
+(def ui-click-counter (comp/factory ClickCounter))
 
 (defsc Person
   [this {:keys [:person/id :person/name :person/age] :as props} {:keys [onDelete]}]
@@ -37,19 +42,23 @@
 (def ui-person-list (comp/factory PersonList))
 
 (defsc Root
-  [this {:keys [friends enemies]}]
+  [this {:keys [friends enemies click-counter]}]
   {:query         [{:friends (comp/get-query PersonList)}
-                   {:enemies (comp/get-query PersonList)}]
-   :initial-state {}}
+                   {:enemies (comp/get-query PersonList)}
+                   {:click-counter (comp/get-query ClickCounter)}]
+   :initial-state (fn [params] {:click-counter (comp/get-initial-state ClickCounter)})}
   (dom/div :.container
-    (dom/h1 "Root component")
-    (dom/div
-      (when friends
-        (ui-person-list friends))
-      (when enemies
-        (ui-person-list enemies)))))
-
-
+    (dom/div :.container
+      (dom/h1 "Counter")
+      (dom/div
+        (ui-click-counter click-counter)))
+    (dom/div :.container
+      (dom/h1 "People")
+      (dom/div
+        (when friends
+          (ui-person-list friends))
+        (when enemies
+          (ui-person-list enemies))))))
 
 (comment
   (comp/computed-factory Person {:keyfn :person/name}))
@@ -64,8 +73,15 @@
 (comment
   ;; require
   ;; [com.fulcrologic.fulcro.algorithms.denormalize :as fdn]
+  ;; [com.fulcrologic.fulcro.algorithms.normalize :as fnm]
   (fdn/db->tree [{:friends [:list/label]}] (comp/get-initial-state Root {}) {})
-  (fdn/db->tree [{:enemies [:list/label {:list/people [:person/name]}]}] (comp/get-initial-state Root {}) {}))
+  (fdn/db->tree [{:enemies [:list/label {:list/people [:person/name]}]}] (comp/get-initial-state Root {}) {})
+  (fdn/db->tree [{:click-counter [:counter/id :counter/clicks]}] (comp/get-initial-state Root {}) {})
+
+  (com.fulcrologic.fulcro.application/current-state app.application/app)
+
+  (fnm/tree->db ClickCounter {:click-counter {:counter/id 1 :counter/clicks 6}})
+  )
 
 (comment
   (df/load! this [:person/id 3] Person {:target (targeting/append-to [:list/id :friends :list/people])}))
