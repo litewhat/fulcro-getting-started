@@ -9,16 +9,12 @@
    {:keys [:error/id :error/message :error/code] :as props}
    {:keys [:input-name] :as computed}]
   {:query         [:error/id :error/message :error/code :error/field-name]
-   :ident         (fn []
-                    (log/spy :debug "Calling :ident in InputError component")
-                    [:error/id id])
+   :ident         (fn [] [:error/id id])
    :initial-state (fn [{:keys [id] :as params}]
-                    (log/spy :debug "Calling :initial-state in InputError component")
-                    (log/spy :debug params)
-                    (log/spy :debug {:error/id         (random-uuid)
-                                     :error/message    "Invalid value"
-                                     :error/code :invalid-value
-                                     :error/field-name :user-registration/email}))}
+                    {:error/id         (or id (random-uuid))
+                     :error/message    "Invalid value"
+                     :error/code       :invalid-value
+                     :error/field-name :user-registration/email})}
   (dom/p :.text-danger message))
 
 (def ui-input-error (comp/computed-factory InputError {:keyfn :error/id}))
@@ -28,16 +24,12 @@
                 :user-registration/password :user-registration/confirm-password
                 :user-registration/errors] :as props}]
   {:query         (fn [params]
-                    (log/spy :debug ::user-registration "Calling :query in UserRegistration component")
-                    (log/spy :debug ::user-registration params)
                     [:user-registration/id :user-registration/email
                      :user-registration/password :user-registration/confirm-password
                      {:user-registration/errors (comp/get-query InputError)}])
    :ident         (fn []
-                    (log/spy :debug ::user-registration "Calling :ident in UserRegistration component")
                     [:user-registration/id id])
    :initial-state (fn [{:keys [id]}]
-                    (log/spy :debug "Calling :initial state in UserRegistration component")
                     {:user-registration/id (or id (random-uuid))
                      :user-registration/errors []})}
   (let [email-errors            (filter #(= :user-registration/email (:error/field-name %)) errors)
@@ -80,7 +72,10 @@
                                                             :user-registration/confirm-password email})]))
                       })
           (map #(ui-input-error %) confirm-password-errors))
-        (dom/button {:onClick #(js/console.log (str "UserRegistration " id))}
+        (dom/button {:disabled (or (seq errors) (not-every? #(or (not-empty %) (some? %)) (map identity [email password confirm-password])))
+                     :onClick  #(comp/transact! this [(ur.mut/register
+                                                        {:user/email    email
+                                                         :user/password password})])}
                     "Register")))))
 
 (def ui-user-registration (comp/factory UserRegistration))
