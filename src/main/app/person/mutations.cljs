@@ -10,7 +10,6 @@
   (action [{:keys [state]}]
     (swap! state merge/remove-ident* [:person/id person-id] [:list/id list-id :list/people]))
   (remote [env]
-    (log/spy :debug env)
     true))
 
 (defmutation increase-counter
@@ -19,5 +18,4 @@
     (let [current-state (app/current-state app)
           counter-state (get-in current-state [:counter/id counter-id])
           counter-tree  (update counter-state :counter/clicks inc)]
-      (log/spy :debug counter-state)
       (merge/merge! app {[:counter/id counter-id] counter-tree} [:counter/id :counter/clicks]))))

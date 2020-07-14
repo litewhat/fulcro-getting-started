@@ -14,7 +14,7 @@
 
 (def app-handler
   (-> not-found-handler
-      (api-middleware/wrap-api {:uri "/api"
+      (api-middleware/wrap-api {:uri    "/api"
                                 :parser api-parser})
       (api-middleware/wrap-transit-params)
       (api-middleware/wrap-transit-response)
