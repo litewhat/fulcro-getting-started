@@ -43,7 +43,7 @@
        :error/field-name param})))
 
 (defmethod validate-input :user-registration/confirm-password
-  [{::keys [:registration-id] :as env} param value]
+  [{:keys [::registration-id] :as env} param value]
   (let [state-map (-> env :state deref)
         password  (get-in state-map [:user-registration/id registration-id :user-registration/password])
         valid?    (s/valid? (s/and (s/nilable string?) #(= password %)) value)]
@@ -51,3 +51,7 @@
       {:error/code       :invalid-confirm-password
        :error/message    "Password does not match"
        :error/field-name param})))
+
+(defn validate-data
+  [{:keys [::registration-id ::data] :as env}]
+  (keep #(validate-input env (first %) (second %)) data))

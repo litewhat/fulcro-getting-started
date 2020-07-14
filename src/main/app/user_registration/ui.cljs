@@ -40,22 +40,22 @@
         (dom/div
           (dom/input {:type     "text" :placeholder "Email"
                       :onChange #(let [email (-> % .-target .-value)]
-                                   (comp/transact! this [(ur.mut/update-data
+                                   (comp/transact! this [(ur.mut/update-input
                                                            {:user-registration/id    id
                                                             :user-registration/email email})]))
                       :onBlur   #(let [email (-> % .-target .-value)]
-                                   (comp/transact! this [(ur.mut/validate-data
+                                   (comp/transact! this [(ur.mut/validate-input
                                                           {:user-registration/id    id
                                                            :user-registration/email email})]))})
           (map #(ui-input-error %) email-errors))
         (dom/div
           (dom/input {:type     "password" :placeholder "Password"
                       :onChange #(let [password (-> % .-target .-value)]
-                                   (comp/transact! this [(ur.mut/update-data
+                                   (comp/transact! this [(ur.mut/update-input
                                                            {:user-registration/id       id
                                                             :user-registration/password password})]))
                       :onBlur   #(let [email (-> % .-target .-value)]
-                                   (comp/transact! this [(ur.mut/validate-data
+                                   (comp/transact! this [(ur.mut/validate-input
                                                            {:user-registration/id    id
                                                             :user-registration/password email})]))
                       })
@@ -63,11 +63,11 @@
         (dom/div
           (dom/input {:type     "password" :placeholder "Confirm password"
                       :onChange #(let [confirm-password (-> % .-target .-value)]
-                                   (comp/transact! this [(ur.mut/update-data
+                                   (comp/transact! this [(ur.mut/update-input
                                                            {:user-registration/id               id
                                                             :user-registration/confirm-password confirm-password})]))
                       :onBlur   #(let [email (-> % .-target .-value)]
-                                   (comp/transact! this [(ur.mut/validate-data
+                                   (comp/transact! this [(ur.mut/validate-input
                                                            {:user-registration/id    id
                                                             :user-registration/confirm-password email})]))
                       })
