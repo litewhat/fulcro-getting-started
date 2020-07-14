@@ -38,7 +38,13 @@
      :user-registration/errors           [[:error/id #uuid"fa8da194-7105-43ae-aaaa-0634ebea094d"]]
      :user-registration/email            "test@example.com"
      :user-registration/password         "asdasd"
-     :user-registration/confirm-password "asdasd"}}})
+     :user-registration/confirm-password "asdasd"}
+    #uuid"f8c38951-9dda-448d-abd3-dcd5f0a918c1"
+    {:user-registration/id               #uuid"b7a51278-1a10-48da-b091-062188c90eea"
+     :user-registration/errors           []
+     :user-registration/email            "test@example.com"
+     :user-registration/password         "zaq1@WSX"
+     :user-registration/confirm-password "zaq1@WSX"}}})
 
 (defn env []
   {:state (atom *state-map*)})
