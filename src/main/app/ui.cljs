@@ -3,7 +3,9 @@
             [com.fulcrologic.fulcro.components :as comp :refer [defsc]]
             [com.fulcrologic.fulcro.data-fetch :as df]
             [com.fulcrologic.fulcro.dom :as dom]
-            [app.person.mutations :as mut]))
+            [taoensso.timbre :as log]
+            [app.person.mutations :as mut]
+            [app.user-registration.ui :as ur.ui]))
 
 (defsc ClickCounter
   [this {:keys [:counter/id :counter/clicks] :as props}]
@@ -42,12 +44,18 @@
 (def ui-person-list (comp/factory PersonList))
 
 (defsc Root
-  [this {:keys [friends enemies click-counter]}]
+  [this {:keys [friends enemies click-counter user-registration]}]
   {:query         [{:friends (comp/get-query PersonList)}
                    {:enemies (comp/get-query PersonList)}
-                   {:click-counter (comp/get-query ClickCounter)}]
-   :initial-state (fn [params] {:click-counter (comp/get-initial-state ClickCounter)})}
+                   {:click-counter (comp/get-query ClickCounter)}
+                   {:user-registration (comp/get-query ur.ui/UserRegistration)}]
+   :initial-state (fn [params]
+                    {:user-registration (comp/get-initial-state ur.ui/UserRegistration)
+                     :click-counter     (comp/get-initial-state ClickCounter)})}
   (dom/div :.container
+    (dom/div :.container
+      (dom/h1 "Registration")
+      (ur.ui/ui-user-registration user-registration))
     (dom/div :.container
       (dom/h1 "Counter")
       (dom/div
