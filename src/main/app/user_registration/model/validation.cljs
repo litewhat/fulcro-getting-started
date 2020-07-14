@@ -1,6 +1,11 @@
-(ns app.user-registration.model.validation)
+(ns app.user-registration.model.validation
+  (:require [cljs.spec.alpha :as s]))
 
 (defmulti validate-input (fn [_ param _] param) :default ::default)
+
+(defmethod validate-input ::default
+  [{:as env} param value]
+  nil)
 
 (def email-regex-str "(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*|\"(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21\\x23-\\x5b\\x5d-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])*\")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\\[(?:(?:(2(5[0-5]|[0-4][0-9])|1[0-9][0-9]|[1-9]?[0-9]))\\.){3}(?:(2(5[0-5]|[0-4][0-9])|1[0-9][0-9]|[1-9]?[0-9])|[a-z0-9-]*[a-z0-9]:(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21-\\x5a\\x53-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])+)\\])")
 
@@ -12,34 +17,37 @@
        :error/message "Invalid email"
        :error/field-name param})))
 
-(defmethod validate-input ::default
-  [{:as env} param value]
-  nil)
+(defn has-lowercase-letter? [s]
+  (not (= s (.toUpperCase s))))
 
-#_#_
+(defn has-uppercase-letter? [s]
+  (not (= s (.toLowerCase s))))
+
+(defn has-number? [s]
+  (.test #"\d" s))
+
+(defn min-length? [len]
+  #(<= len (count %)))
+
 (defmethod validate-input :user-registration/password
   [{:as env} param value]
-  (let [valid? (s/valid? (s/nilable string?) value)]
+  (let [valid? (s/valid? (s/nilable (s/and not-empty
+                                           (min-length? 8)
+                                           has-lowercase-letter?
+                                           has-uppercase-letter?
+                                           has-number?))
+                         value)]
     (when (not valid?)
-      {:code    :invalid-password
-       :message "Invalid password"})))
+      {:error/code    :invalid-password
+       :error/message "Password should contain minimum 8 characters, lowercase letter, uppercase letter and number"
+       :error/field-name param})))
 
 (defmethod validate-input :user-registration/confirm-password
-  [{:as env} param value]
-  (let [password (get-in app-state [:user-registration/id reg-id :password])
-        valid?   (and (s/valid? (s/nilable string?) value) (= password value))]
+  [{::keys [:registration-id] :as env} param value]
+  (let [state-map (-> env :state deref)
+        password  (get-in state-map [:user-registration/id registration-id :user-registration/password])
+        valid?    (s/valid? (s/and (s/nilable string?) #(= password %)) value)]
     (when (not valid?)
-      {:code    :invalid-confirm-password
-       :message "Invalid confirm password"})))
-
-;; validate-input context
-#_
-{:user-registration/id 1
- :user-registration/errors {:email {:code "abc"
-                                    :message "Abc"}
-                            :password {:code "abc"
-                                       :message "Abc"}
-                            :confirm-password {:code "abc"
-                                               :message "Abc"}}}
-
-
+      {:error/code       :invalid-confirm-password
+       :error/message    "Password does not match"
+       :error/field-name param})))
