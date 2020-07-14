@@ -12,7 +12,6 @@
     false? "1234"
     false? ""))
 
-
 (deftest has-uppercase-letter?-test
   (are [pred s] (pred (sut/has-uppercase-letter? s))
     true? "1Óść"
