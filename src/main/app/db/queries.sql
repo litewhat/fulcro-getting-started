@@ -3,10 +3,10 @@
 -- :command :execute
 -- :result :raw
 -- :doc Create extension
-create extension :identifier:name;
+CREATE EXTENSION :identifier:name;
 
 -- :name drop-extension
 -- :command :execute
 -- :result :raw
 -- :doc Drop extension
-drop extension if exists :identifier:name restrict;
+DROP EXTENSION IF EXISTS :identifier:name RESTRICT;
