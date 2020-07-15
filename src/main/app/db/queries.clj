@@ -4,7 +4,8 @@
 
 (declare
   create-extension
-  drop-extension)
+  drop-extension
+  get-all-enum-type-values)
 
 (def ^:private query-file "app/db/queries.sql")
 

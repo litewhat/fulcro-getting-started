@@ -5,6 +5,11 @@
 (declare
   create-app-user-table
   drop-app-user-table
+  create-token-type
+  drop-token-type
+  add-token-type
+  create-token-table
+  drop-token-table
   insert-app-user
   batch-insert-app-user
   get-app-user-by-id
@@ -13,8 +18,6 @@
   delete-app-user
   batch-delete-app-user
 
-  ;create-token-table
-  ;drop-token-table
   ;add-token
   ;create-token
   ;invoke-token
