@@ -1,21 +1,11 @@
 (ns app.person.db.queries-test
   (:require [clojure.test :refer [deftest testing is are use-fixtures]]
-            [taoensso.timbre :as log]
-            [app.db :as db]
             [db.seed :as dbs]
+            [app.db :as db]
+            [app.test.fixtures :as fixtures]
             [app.person.db.queries :as sut]))
 
-(defn db-fixture
-  [db-conn]
-  (fn [f]
-    (log/debug "Setting up tables")
-    (db/set-up-tables! db-conn)
-    (dbs/seed! db-conn)
-    (f)
-    (log/debug "Tearing down tables")
-    (db/tear-down-tables! db-conn)))
-
-(use-fixtures :each (db-fixture db/conn-spec))
+(use-fixtures :each (fixtures/db db/conn-spec))
 
 (deftest ^:integration insert-person-test
   (sut/insert-person db/conn-spec {:name "Paweł" :age 28})
