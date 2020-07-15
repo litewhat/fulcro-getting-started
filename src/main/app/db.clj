@@ -41,10 +41,21 @@
 
   (user-queries/create-app-user-table db-spec)
   (log/debugf "Created %s table" "app_user")
-  )
+
+  (user-queries/create-token-type db-spec)
+  (log/debugf "Created %s type" "token_type")
+
+  (user-queries/create-token-table db-spec)
+  (log/debugf "Created %s table" "token"))
 
 (defn tear-down-tables!
   [db-spec]
+  (user-queries/drop-token-table db-spec)
+  (log/debugf "Dropped %s table" "token")
+
+  (user-queries/drop-token-type db-spec)
+  (log/debugf "Created %s type" "token_type")
+
   (user-queries/drop-app-user-table db-spec)
   (log/debugf "Dropped %s table" "app_user")
 
