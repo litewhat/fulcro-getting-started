@@ -78,8 +78,9 @@
                                       (map identity [email password confirm-password])))]
                   (dom/button {:disabled disabled?
                                :onClick  #(comp/transact! this [(ur.mut/register
-                                                                  {:user/email    email
-                                                                   :user/password password})])}
+                                                                  {:user/email            email
+                                                                   :user/password         password
+                                                                   :user/confirm-password confirm-password})])}
                     "Register"))))))
 
 (def ui-user-registration (comp/factory UserRegistration))

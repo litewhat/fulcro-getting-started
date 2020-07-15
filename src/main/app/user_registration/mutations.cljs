@@ -48,7 +48,7 @@
                        :always (merge/merge-component component component-data)))))))
 
 (defmutation register
-  [{:user/keys [email password] :as params}]
+  [{:user/keys [:email :password :confirm-password] :as params}]
   (action [{:keys [state] :as env}]
     (log/debug "Register user")
     (log/spy :debug params))
