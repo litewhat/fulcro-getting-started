@@ -16,6 +16,41 @@ CREATE TABLE app_user (
 -- :doc Drop user table
 DROP TABLE IF EXISTS app_user RESTRICT;
 
+-- :name create-token-type
+-- :command :execute
+-- :result :raw
+-- :doc Create token_type
+CREATE TYPE token_type AS ENUM ('access', 'refresh');
+
+-- :name drop-token-type
+-- :command :execute
+-- :result :raw
+-- :doc Create token_type
+DROP TYPE IF EXISTS token_type;
+
+-- :name add-token-type
+-- :command :execute
+-- :result :raw
+-- :doc Add token type
+ALTER TYPE token_type ADD VALUE /*~ (format "'%s'" (:value params)) ~*/;
+
+-- :name create-token-table
+-- :command :execute
+-- :result :raw
+-- :doc Create token table
+CREATE TABLE token (
+  id          uuid DEFAULT uuid_generate_v4() PRIMARY KEY,
+  type        token_type NOT NULL,
+  value       varchar(255) NOT NULL,
+  created_at  timestamp NOT NULL DEFAULT current_timestamp
+);
+
+-- :name drop-token-table
+-- :command :execute
+-- :result :raw
+-- :doc Drop token table
+DROP TABLE IF EXISTS token RESTRICT;
+
 -- :name insert-app-user
 -- :command :returning-execute
 -- :result :one
