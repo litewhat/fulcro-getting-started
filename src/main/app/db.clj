@@ -3,7 +3,8 @@
             [hugsql.adapter.clojure-java-jdbc :as had]
             [taoensso.timbre :as log]
             [app.config :as cfg]
-            [app.person.db.queries :as person-queries]))
+            [app.person.db.queries :as person-queries]
+            [app.user.db.queries :as user-queries]))
 
 (def conn-spec
   {:dbtype   "postgres"
@@ -28,10 +29,17 @@
   (log/debugf "Created %s table" "person_list")
 
   (person-queries/create-person-list-people-table db-spec)
-  (log/debugf "Created %s table" "person_list_person"))
+  (log/debugf "Created %s table" "person_list_person")
+
+  (user-queries/create-user-table db-spec)
+  (log/debugf "Created %s table" "app_user")
+  )
 
 (defn tear-down-tables!
   [db-spec]
+  (user-queries/drop-user-table db-spec)
+  (log/debugf "Dropped %s table" "app_user")
+
   (person-queries/drop-person-list-people-table db-spec)
   (log/debugf "Dropped %s table" "person_list_person")
 

@@ -29,4 +29,4 @@
 (log/debug "Person queries initialized")
 
 (comment
-  (clojure.pprint/pprint (hc/map-of-db-fns "app/person/db/queries.sql")))
+  (clojure.pprint/pprint (hc/map-of-db-fns query-file)))
