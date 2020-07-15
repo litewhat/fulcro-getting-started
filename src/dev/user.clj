@@ -6,6 +6,7 @@
             [app.db :as db]
             [app.config :as cfg]
             [app.person.db.queries :as person-queries]
+            [app.user.db.queries :as user-queries]
             [app.server :as server]))
 
 ;; https://github.com/clojure/tools.namespace
@@ -101,6 +102,25 @@
     db/conn-spec
     {:list_id (str :friends)
      :person_id 1})
+  )
+
+(comment
+  (let [id (:id (user-queries/insert-app-user db/conn-spec {:email "test@example.com"}))]
+    (user-queries/get-app-user-by-id db/conn-spec {:id id}))
+
+  (user-queries/get-all-app-users db/conn-spec)
+  (user-queries/batch-insert-app-user db/conn-spec {:users [["batch1@example.com"]
+                                                            ["batch2@example.com"]
+                                                            ["batch3@example.com"]]})
+
+  (user-queries/get-person-by-email db/conn-spec {:email "batch1@example.com"})
+
+  (user-queries/delete-app-user db/conn-spec {:id #uuid "5bb0e6be-206a-444a-b0ca-b204c80018f5"})
+  (user-queries/get-app-user-by-email db/conn-spec {:email "test@example.com"})
+
+  (user-queries/batch-delete-app-user db/conn-spec {:ids [#uuid "0be4e19c-e406-4e57-87a9-8dc1c63ce83d"
+                                                    #uuid "2c8ea22d-26c8-4142-8474-fc794d5a26c0"
+                                                    #uuid "ce1f9251-8df6-43d4-9a3b-317614918891"] })
   )
 
 (comment
