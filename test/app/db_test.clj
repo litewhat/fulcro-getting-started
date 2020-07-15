@@ -11,7 +11,7 @@
   (testing "all tables exist after setup"
     (db/set-up-tables! db/conn-spec)
     (let [tables (set (list-table-names db/conn-spec))]
-      (is (= #{"person" "person_list" "person_list_people"} tables))))
+      (is (= #{"person" "person_list" "person_list_people" "app_user"} tables))))
 
   (testing "no table exists after tear down"
     (db/tear-down-tables! db/conn-spec)

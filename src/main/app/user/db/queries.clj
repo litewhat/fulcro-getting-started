@@ -5,11 +5,14 @@
 (declare
   create-app-user-table
   drop-app-user-table
-  create-token-table
-  drop-token-table
-  add-token
-  create-token
-  invoke-token)
+  insert-app-user
+
+  ;create-token-table
+  ;drop-token-table
+  ;add-token
+  ;create-token
+  ;invoke-token
+  )
 
 (def ^:private query-file "app/user/db/queries.sql")
 
