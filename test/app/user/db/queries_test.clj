@@ -78,6 +78,20 @@
     (is (= (count dbs/users) (count users)))
     (is (= #{:id :email :created_at :deleted_at} (first params)))))
 
+(deftest ^:integration get-app-users-by-emails-test
+  (testing "existing users"
+    (let [emails ["seed1@user.com" "seed2@user.com" "seed3@user.com"]
+          users  (sut/get-app-users-by-emails db/conn-spec {:emails emails})
+          params (set (map (comp set keys) users))]
+      (is (= 1 (count params)))
+      (is (= #{:id :email :created_at :deleted_at} (first params)))
+      (is (count emails) (count users))))
+
+  (testing "nonexistent users"
+    (let [emails ["nonexistent1@user.com" "nonexistent2@user.com" "nonexistent3@user.com"]
+          users  (sut/get-app-users-by-emails db/conn-spec {:emails emails})]
+      (is (zero? (count users))))))
+
 (deftest ^:integration delete-app-user-test
   (let [user     (sut/get-app-user-by-email db/conn-spec {:email "seed1@user.com"})
         affected (sut/delete-app-user db/conn-spec {:id (:id user)})]

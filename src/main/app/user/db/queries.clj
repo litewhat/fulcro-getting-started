@@ -14,6 +14,7 @@
   batch-insert-app-user
   get-app-user-by-id
   get-app-user-by-email
+  get-app-users-by-emails
   get-all-app-users
   delete-app-user
   batch-delete-app-user

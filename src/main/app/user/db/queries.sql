@@ -87,6 +87,13 @@ SELECT * FROM app_user
 -- :doc Select all records from app_user table
 SELECT * FROM app_user;
 
+-- :name get-app-users-by-emails
+-- :command :query
+-- :result :many
+-- :doc Select all records from app_user table for given emails
+SELECT * FROM app_user
+    WHERE email IN :tuple:emails;
+
 -- :name delete-app-user
 -- :command :execute
 -- :result :affected
