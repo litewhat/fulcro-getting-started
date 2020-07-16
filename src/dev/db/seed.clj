@@ -1,7 +1,8 @@
 (ns db.seed
   (:require [taoensso.timbre :as log]
             [app.db :as db]
-            [app.person.db.queries :as person-queries]))
+            [app.person.db.queries :as person-queries]
+            [app.user.db.queries :as user-queries]))
 
 (def people
   [["Paweł" 28]
@@ -16,6 +17,11 @@
    ["Serge" 78]
    ["Luc" 42]
    ["Andy" 14]])
+
+(def users
+  [["seed1@user.com"]
+   ["seed2@user.com"]
+   ["seed3@user.com"]])
 
 (def person-lists
   (map (comp vector str) [:friends :enemies]))
@@ -33,7 +39,10 @@
     (person-queries/add-people-to-list
       db-conn
       {:people (mapv (partial vector (str list-id)) people-ids)}))
-  (log/debug "Seeded 'person_list_people' table"))
+  (log/debug "Seeded 'person_list_people' table")
+  (user-queries/batch-insert-app-user db-conn {:users users})
+  (log/debug "Seeded 'app_user' table")
+  )
 
 (comment
   (seed! db/conn-spec))
