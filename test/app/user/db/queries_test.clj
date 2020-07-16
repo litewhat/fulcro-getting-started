@@ -18,9 +18,9 @@
 
 (deftest ^:integration insert-app-user-test
   (testing "successful insert"
-    (let [emails ["test1@example.com" "test2@example.com"]
-          users (for [email emails]
-                  (sut/insert-app-user db/conn-spec {:email email}))
+    (let [emails    ["test1@example.com" "test2@example.com"]
+          users     (for [email emails]
+                      (sut/insert-app-user db/conn-spec {:email email}))
           creations (map :created_at users)]
       (is (= emails (mapv :email users)))
       (is (every? nil? (map :deleted_at users)))
@@ -34,7 +34,7 @@
 
 (deftest ^:integration batch-insert-app-user-test
   (testing "successful insert"
-    (let [emails ["batchtest1@example.com" "batchtest2@example.com" "batchtest3@example.com"]
+    (let [emails   ["batchtest1@example.com" "batchtest2@example.com" "batchtest3@example.com"]
           affected (sut/batch-insert-app-user db/conn-spec {:users (mapv vector emails)})
           inserted (for [email emails] (sut/get-app-user-by-email db/conn-spec {:email email}))]
       (is (= (count emails) affected))
@@ -79,7 +79,7 @@
     (is (= #{:id :email :created_at :deleted_at} (first params)))))
 
 (deftest ^:integration delete-app-user-test
-  (let [user (sut/get-app-user-by-email db/conn-spec {:email "seed1@user.com"})
+  (let [user     (sut/get-app-user-by-email db/conn-spec {:email "seed1@user.com"})
         affected (sut/delete-app-user db/conn-spec {:id (:id user)})]
     (is (= 1 affected))))
 
@@ -98,3 +98,47 @@
           affected     (sut/batch-delete-app-user db/conn-spec {:ids (vec ids)})
           users-after  (sut/get-all-app-users db/conn-spec)]
       (is (= (count users-before) (count users-after))))))
+
+(deftest ^:integration mark-deleted-app-user-test
+  (testing "marking existing users as deleted"
+    (let [emails    ["seed1@user.com" "seed2@user.com" "seed3@user.com"]
+          users     (for [email emails] (sut/get-app-user-by-email db/conn-spec {:email email}))
+          res       (for [user users] (sut/mark-deleted-app-user db/conn-spec {:id (:id user)}))
+          deletions (map :deleted_at res)]
+      (is (= (count res) (count users) (count emails)))
+      (is (every? nil? (map :deleted_at users)))
+      (is (every? #(= java.sql.Timestamp (type %)) deletions))
+      (is (= deletions (sort #(.before %1 %2) deletions)))))
+
+  (testing "marking nonexistent users as deleted"
+    (let [ids          (repeatedly 2 #(UUID/randomUUID))
+          users-before (sut/get-all-app-users db/conn-spec)
+          responses    (for [id ids] (sut/mark-deleted-app-user db/conn-spec {:id id}))
+          affected     (count (keep identity responses))
+          users-after  (sut/get-all-app-users db/conn-spec)]
+      (is (zero? affected))
+      (is (= (count users-before) (count users-after)))
+      (is (every? nil? responses)))))
+
+(deftest ^:integration batch-mark-deleted-app-user-test
+  (testing "marking existing users as deleted"
+    (let [emails          ["seed1@user.com" "seed2@user.com" "seed3@user.com"]
+          users-to-delete (for [email emails] (sut/get-app-user-by-email db/conn-spec {:email email}))
+          users-before    (sut/get-all-app-users db/conn-spec)
+          response        (sut/batch-mark-deleted-app-user db/conn-spec {:ids (mapv :id users-before)})
+          users-after     (sut/get-all-app-users db/conn-spec)
+          affected        (count (keep identity response))
+          item-params     (set (map (comp set keys) response))]
+      (is (= (count emails) (count response)))
+      (is (= (count users-to-delete) affected))
+      (is (= #{:id :email :created_at :deleted_at} (first item-params)))
+      (is (= (count users-before) (count users-after)))))
+
+  (testing "delete nonexistent users"
+    (let [ids          (repeatedly 2 #(UUID/randomUUID))
+          users-before (sut/get-all-app-users db/conn-spec)
+          response     (sut/batch-mark-deleted-app-user db/conn-spec {:ids (vec ids)})
+          users-after  (sut/get-all-app-users db/conn-spec)
+          affected     (count (keep identity response))]
+      (is (= (count users-before) (count users-after)))
+      (is (zero? affected)))))

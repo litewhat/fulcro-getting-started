@@ -39,10 +39,10 @@ ALTER TYPE token_type ADD VALUE /*~ (format "'%s'" (:value params)) ~*/;
 -- :result :raw
 -- :doc Create token table
 CREATE TABLE token (
-  id          uuid DEFAULT uuid_generate_v4() PRIMARY KEY,
-  type        token_type NOT NULL,
-  value       varchar(255) NOT NULL,
-  created_at  timestamp NOT NULL DEFAULT current_timestamp
+    id          uuid DEFAULT uuid_generate_v4() PRIMARY KEY,
+    type        token_type NOT NULL,
+    value       varchar(255) NOT NULL,
+    created_at  timestamp NOT NULL DEFAULT current_timestamp
 );
 
 -- :name drop-token-table
@@ -56,29 +56,29 @@ DROP TABLE IF EXISTS token RESTRICT;
 -- :result :one
 -- :doc Insert app_user record
 INSERT INTO app_user (id, email)
-VALUES (DEFAULT, :email)
-RETURNING *;
+    VALUES (DEFAULT, :email)
+    RETURNING *;
 
 -- :name batch-insert-app-user
 -- :command :execute
 -- :result :affected
 -- :doc Insert many app_user records
 INSERT INTO app_user (email)
-VALUES :tuple*:users;
+    VALUES :tuple*:users;
 
 -- :name get-app-user-by-id
 -- :command :query
 -- :result :one
 -- :doc Select app_user with given id
 SELECT * FROM app_user
-WHERE id = :id;
+    WHERE id = :id;
 
 -- :name get-app-user-by-email
 -- :command :query
 -- :result :one
 -- :doc Select app_user with given email
 SELECT * FROM app_user
-WHERE email = :email;
+    WHERE email = :email;
 
 -- :name get-all-app-users
 -- :command :query
@@ -91,12 +91,29 @@ SELECT * FROM app_user;
 -- :result :affected
 -- :doc Removes app_user record for given id
 DELETE FROM app_user
-WHERE id = :id;
+    WHERE id = :id;
 
 -- :name batch-delete-app-user
 -- :command :execute
 -- :result :affected
 -- :doc Removes app_user records for given list of ids
 DELETE FROM app_user
-WHERE id IN :tuple:ids;
+    WHERE id IN :tuple:ids;
 
+-- :name mark-deleted-app-user
+-- :command :returning-execute
+-- :result :one
+-- :doc Set deleted_at timestamp to app_user record with given id
+UPDATE app_user
+    SET deleted_at = now()
+    WHERE id = :id
+    RETURNING *;
+
+-- :name batch-mark-deleted-app-user
+-- :command :returning-execute
+-- :result :many
+-- :doc Set deleted_at timestamp to app_user records with given ids
+UPDATE app_user
+    SET deleted_at = now()
+    WHERE id IN :tuple:ids
+    RETURNING *;

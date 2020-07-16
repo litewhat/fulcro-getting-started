@@ -17,6 +17,8 @@
   get-all-app-users
   delete-app-user
   batch-delete-app-user
+  mark-deleted-app-user
+  batch-mark-deleted-app-user
 
   ;add-token
   ;create-token
