@@ -35,9 +35,9 @@
 (deftest ^:integration batch-insert-app-user-test
   (testing "successful insert"
     (let [emails   ["batchtest1@example.com" "batchtest2@example.com" "batchtest3@example.com"]
-          affected (sut/batch-insert-app-user db/conn-spec {:users (mapv vector emails)})
+          response (sut/batch-insert-app-user db/conn-spec {:users (mapv vector emails)})
           inserted (for [email emails] (sut/get-app-user-by-email db/conn-spec {:email email}))]
-      (is (= (count emails) affected))
+      (is (= (count emails) (count response)))
       (is (= (set emails) (set (mapv :email inserted))))
       (is (every? nil? (map :deleted_at inserted)))
       (is (= 1 (count (set (map :created_at inserted)))))))
@@ -45,7 +45,7 @@
   (testing "email duplication"
     (let [emails ["batchtest1@example.com" "batchtest4@example.com" "batchtest2@example.com"]]
       (is (thrown-with-msg?
-            java.sql.BatchUpdateException
+            org.postgresql.util.PSQLException
             #"ERROR: duplicate key value violates unique constraint \"app_user_email_key\""
             (sut/batch-insert-app-user db/conn-spec {:users (mapv vector emails)}))))))
 
@@ -142,3 +142,15 @@
           affected     (count (keep identity response))]
       (is (= (count users-before) (count users-after)))
       (is (zero? affected)))))
+
+(deftest ^:integration get-all-not-deleted-users-test
+  (let [emails       ["get_not_deleted_test1@example.com" "get_not_deleted_test2@example.com" "get_not_deleted_test3@example.com"]
+        inserted     (sut/batch-insert-app-user db/conn-spec {:users (mapv vector emails)})
+        users-before (sut/get-all-app-users db/conn-spec)
+        soft-deleted (sut/batch-mark-deleted-app-user db/conn-spec {:ids (mapv :id inserted)})
+        users-after  (sut/get-all-app-users db/conn-spec)
+        not-deleted  (sut/get-all-not-deleted-users db/conn-spec)]
+    (is (= (count users-before) (count users-after)))
+    (is (= (count inserted) (count soft-deleted)))
+    (is (= (count emails) (count inserted)))
+    (is (= (- (count users-after) (count soft-deleted)) (count not-deleted)))))

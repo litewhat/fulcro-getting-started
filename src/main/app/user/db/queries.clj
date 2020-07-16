@@ -19,6 +19,7 @@
   batch-delete-app-user
   mark-deleted-app-user
   batch-mark-deleted-app-user
+  get-all-not-deleted-users
 
   ;add-token
   ;create-token

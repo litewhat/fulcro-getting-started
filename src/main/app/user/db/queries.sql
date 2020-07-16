@@ -60,11 +60,12 @@ INSERT INTO app_user (id, email)
     RETURNING *;
 
 -- :name batch-insert-app-user
--- :command :execute
--- :result :affected
+-- :command :returning-execute
+-- :result :many
 -- :doc Insert many app_user records
 INSERT INTO app_user (email)
-    VALUES :tuple*:users;
+    VALUES :tuple*:users
+    RETURNING *;
 
 -- :name get-app-user-by-id
 -- :command :query
@@ -117,3 +118,10 @@ UPDATE app_user
     SET deleted_at = now()
     WHERE id IN :tuple:ids
     RETURNING *;
+
+-- :name get-all-not-deleted-users
+-- :command :query
+-- :result :many
+-- :doc Return all users with deleted_at equals to NULL
+SELECT * FROM app_user
+    WHERE deleted_at IS NULL;
