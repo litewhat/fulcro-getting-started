@@ -18,8 +18,10 @@
            com.layerware/hugsql-adapter-clojure-java-jdbc {:mvn/version "0.5.1"}
            org.postgresql/postgresql                      {:mvn/version "42.2.2"}
 
-           ;; other
+           ;; logging
            com.taoensso/timbre                            {:mvn/version "4.10.0"}
+
+           ;; config
            aero                                           {:mvn/version "1.1.6"}}
  :aliases {:dev       {:extra-paths ["src/dev"]
                        :extra-deps  {org.clojure/clojurescript   {:mvn/version "1.10.742"}
