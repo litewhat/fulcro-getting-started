@@ -52,4 +52,6 @@
   (action [{:keys [state] :as env}]
     (log/debug "Register user")
     (log/spy :debug params))
-  #_(remote [env] true))
+  (remote [env]
+    (log/debug "Calling remote register mutation")
+    true))
