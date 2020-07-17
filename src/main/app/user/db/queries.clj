@@ -21,10 +21,9 @@
   mark-deleted-app-user
   batch-mark-deleted-app-user
   get-all-not-deleted-users
-
-  ;add-token
-  ;create-token
-  ;invoke-token
+  insert-token
+  get-token-by-id
+  get-all-tokens
   )
 
 (def ^:private query-file "app/user/db/queries.sql")

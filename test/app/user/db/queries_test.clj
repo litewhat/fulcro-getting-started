@@ -168,3 +168,49 @@
     (is (= (count inserted) (count soft-deleted)))
     (is (= (count emails) (count inserted)))
     (is (= (- (count users-after) (count soft-deleted)) (count not-deleted)))))
+
+(deftest ^:integration insert-token-test
+  (testing "inserting with allowed type"
+    (let [inserted (sut/insert-token db/conn-spec {:type "access" :value "tokenValue"})
+          params   (set (keys inserted))]
+      (is (= #{:id :type :value :invoked_at :created_at} params))
+      (is (uuid? (:id inserted)))
+      (is (nil? (:invoked_at inserted)))
+      (is (= java.sql.Timestamp (type (:created_at inserted))))))
+
+  (testing "inserting with unallowed type"
+    (is (thrown-with-msg?
+          org.postgresql.util.PSQLException
+          #"ERROR: invalid input value for enum token_type: \"unallowedType\""
+          (sut/insert-token db/conn-spec {:type "unallowedType" :value "tokenValue"})))))
+
+(deftest ^:integration get-token-by-id-test
+  (testing "existing token"
+    (let [inserted (sut/insert-token db/conn-spec {:type "access" :value "tokenValue"})
+          response (sut/get-token-by-id db/conn-spec {:id (:id inserted)})
+          params   (set (keys response))]
+      (is (= #{:id :type :value :invoked_at :created_at} params))
+      (is (uuid? (:id response)))
+      (is (nil? (:invoked_at response)))
+      (is (= java.sql.Timestamp (type (:created_at response))))
+      (is (= inserted response))))
+
+  (testing "nonexistent token"
+    (let [response (sut/get-token-by-id db/conn-spec {:id (UUID/randomUUID)})]
+      (is (nil? response)))))
+
+(deftest ^:integration get-all-tokens
+  (testing "empty table"
+    (let [tokens (sut/get-all-tokens db/conn-spec)]
+      (is (empty? tokens))))
+
+  (testing "tokens exist"
+    (let [tuples        [["access" "accessTokenValue1"]
+                         ["access" "accessTokenValue2"]
+                         ["refresh" "refreshTokenValue1"]
+                         ["refresh" "refreshTokenValue2"]]
+          tokens-before (sut/get-all-tokens db/conn-spec)
+          inserted      (doall (for [[type value] tuples] (sut/insert-token db/conn-spec {:type type :value value})))
+          tokens-after  (sut/get-all-tokens db/conn-spec)]
+      (is (= (count tuples) (count inserted)))
+      (is (= (+ (count tuples) (count tokens-before)) (count tokens-after))))))

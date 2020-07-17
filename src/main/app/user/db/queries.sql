@@ -42,6 +42,7 @@ CREATE TABLE token (
     id          uuid DEFAULT uuid_generate_v4() PRIMARY KEY,
     type        token_type NOT NULL,
     value       varchar(255) NOT NULL,
+    invoked_at  timestamp NULL,
     created_at  timestamp NOT NULL DEFAULT current_timestamp
 );
 
@@ -55,8 +56,8 @@ DROP TABLE IF EXISTS token RESTRICT;
 -- :command :returning-execute
 -- :result :one
 -- :doc Insert app_user record
-INSERT INTO app_user (id, email)
-    VALUES (DEFAULT, :email)
+INSERT INTO app_user (email)
+    VALUES (:email)
     RETURNING *;
 
 -- :name batch-insert-app-user
@@ -132,3 +133,24 @@ UPDATE app_user
 -- :doc Return all users with deleted_at equals to NULL
 SELECT * FROM app_user
     WHERE deleted_at IS NULL;
+
+-- :name insert-token
+-- :command :returning-execute
+-- :result :one
+-- :doc Insert token record
+INSERT INTO token (type, value)
+    VALUES (/*~ (format "'%s'" (:type params)) ~*/, :value)
+    RETURNING *;
+
+-- :name get-token-by-id
+-- :command :query
+-- :result :one
+-- :doc Select token for given id
+SELECT * FROM token
+    WHERE id = :id;
+
+-- :name get-all-tokens
+-- :command :query
+-- :result :many
+-- :doc Select all records from token table
+SELECT * FROM token;
