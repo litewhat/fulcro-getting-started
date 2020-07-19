@@ -36,12 +36,17 @@
     (let [state-map           (deref state)
           field-names         [:user-registration/email :user-registration/password :user-registration/confirm-password]
           data-to-validate    (select-keys params field-names)
+          ;; refactor: extract to function
           env'                (assoc env ::v/registration-id registration-id ::v/data data-to-validate)
           validation-errors   (v/validate-data env')
           registration-errors (m/list-errors env' registration-id)
           {:keys [affected unaffected]} (split-affected-errors registration-errors data-to-validate)
-          component-data      {:user-registration/id     registration-id
-                               :user-registration/errors (vec (concat unaffected (map #(assoc % :error/id (random-uuid)) validation-errors)))}]
+          new-errors          (vec (concat unaffected (map #(assoc % :error/id (random-uuid)) validation-errors)))
+          event               (if (seq new-errors) :wrong-input :correct-input)
+          registration        (m/make-status-transition env' registration-id event)
+          component-data      (assoc registration :user-registration/errors new-errors)
+          ;; END refactor: extract to function
+          ]
       (swap! state (fn [s]
                      (cond-> s
                        (seq affected) (assoc :error/id (apply dissoc (:error/id state-map) (map :error/id affected)))
