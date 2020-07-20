@@ -30,6 +30,7 @@
      :user-registration/errors           [[:error/id #uuid"2630743f-8d83-4e14-a577-3493dad4c802"]
                                           [:error/id #uuid"9b496605-9371-4c9e-9ab3-b7824e5af59f"]
                                           [:error/id #uuid"c5d4f45d-524c-4542-b702-4b1e02a62d69"]]
+     :user-registration/status           :invalid-inputs
      :user-registration/email            "adsasdasd"
      :user-registration/password         "asdasd"
      :user-registration/confirm-password "asdasd"}
@@ -37,14 +38,24 @@
     {:user-registration/id               #uuid"b7a51278-1a10-48da-b091-062188c90eea"
      :user-registration/errors           [[:error/id #uuid"fa8da194-7105-43ae-aaaa-0634ebea094d"]]
      :user-registration/email            "test@example.com"
+     :user-registration/status           :invalid-inputs
      :user-registration/password         "asdasd"
      :user-registration/confirm-password "asdasd"}
     #uuid"f8c38951-9dda-448d-abd3-dcd5f0a918c1"
-    {:user-registration/id               #uuid"b7a51278-1a10-48da-b091-062188c90eea"
+    {:user-registration/id               #uuid"f8c38951-9dda-448d-abd3-dcd5f0a918c1"
      :user-registration/errors           []
      :user-registration/email            "test@example.com"
+     :user-registration/status           :valid-inputs
      :user-registration/password         "zaq1@WSX"
      :user-registration/confirm-password "zaq1@WSX"}}})
 
 (defn env []
   {:state (atom *state-map*)})
+
+(defn registration []
+  {:user-registration/id               (random-uuid)
+   :user-registration/errors           []
+   :user-registration/status           :started
+   :user-registration/email            "abc@test.com"
+   :user-registration/password         "zaq1@WSX"
+   :user-registration/confirm-password "zaq1@WSX"})
