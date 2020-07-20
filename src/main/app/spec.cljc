@@ -2,6 +2,9 @@
   (:require #?(:clj [clojure.spec.alpha :as s]
                :cljs [cljs.spec.alpha :as s])))
 
+(s/def :error/code keyword?)
+(s/def :error/message string?)
+(s/def :error/param keyword?)
 (s/def :token/type #{:access :refresh})
 (s/def :token/value string?)
 (s/def :user/id uuid?)

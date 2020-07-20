@@ -32,7 +32,20 @@
              :user/email      (:email new-user)
              :user/created-at (:created_at new-user)}))))))
 
-(s/def ::register.response
+(s/def :app.user-registration.mutations.register/success
   (s/keys :req [:user/id :user/email :user/created-at]))
+
+(s/def :app.user-registration.mutations.register/errors
+  (s/coll-of
+    (s/keys :req-un [:error/code :error/message]
+            :opt-un [:error/param])
+    :kind vector?))
+
+(s/def :app.user-registration.mutations.register/error
+  (s/keys :req-un [:app.user-registration.mutations.register/errors]))
+
+(s/def ::register.response
+  (s/or :success :app.user-registration.mutations.register/success
+        :error :app.user-registration.mutations.register/error))
 
 (def mutations [register])
