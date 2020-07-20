@@ -1,18 +1,14 @@
 (ns app.user-registration.model)
 
-(defn list-errors
-  "Returns errors associated with given registration id."
-  [{:keys [:state] :as env} id]
-  (let [state-map    (deref state)
-        registration (get-in state-map [:user-registration/id id])
-        error-ids    (map second (:user-registration/errors registration))
-        error-table  (:error/id state-map)]
-    (vals (select-keys error-table error-ids))))
+(def input-field-names
+  [:user-registration/email
+   :user-registration/password
+   :user-registration/confirm-password])
 
 (def status-sm
   {:started        {:correct-input :valid-inputs
                     :wrong-input   :invalid-inputs}
-   :valid-inputs   {:click-register :in-progres
+   :valid-inputs   {:click-register :in-progress
                     :wrong-input    :invalid-inputs}
    :invalid-inputs {:correct-input :valid-inputs}
    :in-progress    {:success :success
@@ -21,7 +17,52 @@
    :failure        nil})
 
 (defn make-status-transition
-  [{:keys [:state] :as env} id event]
-  (let [state-map (deref state)
-        registration (get-in state-map [:user-registration/id id])]
-    (update registration :user-registration/status #(or (get (get status-sm %) event) %))))
+  [registration event]
+  (update registration :user-registration/status #(or (get (get status-sm %) event) %)))
+
+(defn input-values
+  [registration]
+  (select-keys registration input-field-names))
+
+(defn split-affected-errors
+  "Takes current registration errors, presumably returned by
+  `app.user-registration.model/list-errors` function and `data`
+  map which is supposed to be validated
+  i.e. by `app.user-registration.model.validation/validate-data` function.
+
+   Groups registration errors into two groups:
+   1. `:affected` by current registration process
+      - these errors should be overwritten in app state
+   2. `:unaffected` by current registration process
+      - these errors should remain unchanged in app state."
+  [registration-errors data]
+  (let [affected-fields (set (keys data))]
+    (group-by (fn [item]
+                (if (contains? affected-fields (:error/field-name item))
+                  :affected
+                  :unaffected))
+              registration-errors)))
+
+(defn by-id
+  "Returns registration with given id"
+  [{:keys [state] :as env} id]
+  (let [state-map (deref state)]
+    (get-in state-map [:user-registration/id id])))
+
+(defn select-errors
+  "Selects errors with given ids from error table.
+  Result:
+  {error-id-1 error-1
+   error-id-2 error-2
+   ...}"
+  [{:keys [state] :as env} ids]
+  (let [state-map   (deref state)
+        error-table (:error/id state-map)]
+    (vals (select-keys error-table ids))))
+
+(defn list-errors
+  "Returns errors associated with given registration id."
+  [env id]
+  (let [registration (by-id env id)
+        error-ids    (map second (:user-registration/errors registration))]
+    (select-errors env error-ids)))

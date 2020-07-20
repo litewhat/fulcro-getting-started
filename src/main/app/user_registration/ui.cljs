@@ -25,14 +25,16 @@
                 :user-registration/status
                 :user-registration/password
                 :user-registration/confirm-password
-                :user-registration/errors] :as props}]
+                :user-registration/errors
+                :user-registration/remote-errors] :as props}]
   {:query         (fn [params]
                     [:user-registration/id
                      :user-registration/email
                      :user-registration/password
                      :user-registration/confirm-password
                      :user-registration/status
-                     {:user-registration/errors (comp/get-query InputError)}])
+                     {:user-registration/errors (comp/get-query InputError)}
+                     :user-registration/remote-errors])
    :ident         (fn []
                     [:user-registration/id id])
    :initial-state (fn [{:keys [id]}]
@@ -42,44 +44,62 @@
   (let [email-errors            (filter #(= :user-registration/email (:error/field-name %)) errors)
         password-errors         (filter #(= :user-registration/password (:error/field-name %)) errors)
         confirm-password-errors (filter #(= :user-registration/confirm-password (:error/field-name %)) errors)]
-    (dom/div
-      (dom/form {:onSubmit (fn [e] (.preventDefault e))}
-        (dom/div
-          (dom/input {:type     "text" :placeholder "Email"
-                      :onChange #(let [email (-> % .-target .-value)]
-                                   (comp/transact! this [(ur.mut/update-input
-                                                           {:user-registration/id    id
-                                                            :user-registration/email email})
-                                                         (ur.mut/validate-input
-                                                           {:user-registration/id    id
-                                                            :user-registration/email email})]))})
-          (map #(ui-input-error %) email-errors))
-        (dom/div
-          (dom/input {:type     "password" :placeholder "Password"
-                      :onChange #(let [password (-> % .-target .-value)]
-                                   (comp/transact! this [(ur.mut/update-input
-                                                           {:user-registration/id       id
-                                                            :user-registration/password password})
-                                                         (ur.mut/validate-input
-                                                           {:user-registration/id       id
-                                                            :user-registration/password password})]))})
-          (map #(ui-input-error %) password-errors))
-        (dom/div
-          (dom/input {:type     "password" :placeholder "Confirm password"
-                      :onChange #(let [confirm-password (-> % .-target .-value)]
-                                   (comp/transact! this [(ur.mut/update-input
-                                                           {:user-registration/id               id
-                                                            :user-registration/confirm-password confirm-password})
-                                                         (ur.mut/validate-input
-                                                           {:user-registration/id               id
-                                                            :user-registration/confirm-password confirm-password})]))})
-          (map #(ui-input-error %) confirm-password-errors))
-        (let [disabled? (not= :valid-inputs status)]
-          (dom/button {:disabled disabled?
-                       :onClick  #(comp/transact! this [(ur.mut/register
-                                                          {:user/email            email
-                                                           :user/password         password
-                                                           :user/confirm-password confirm-password})])}
-                      "Register"))))))
+    (cond
+      (contains? #{:started :valid-inputs :invalid-inputs} status)
+      (dom/div {}
+        (dom/form {:onSubmit (fn [e] (.preventDefault e))}
+                  (dom/div
+                    (dom/input {:type     "text" :placeholder "Email"
+                                :onChange #(let [email (-> % .-target .-value)]
+                                             (comp/transact! this [(ur.mut/update-input
+                                                                     {:user-registration/id    id
+                                                                      :user-registration/email email})
+                                                                   (ur.mut/validate-input
+                                                                     {:user-registration/id    id
+                                                                      :user-registration/email email})]))})
+                    (map #(ui-input-error %) email-errors))
+                  (dom/div
+                    (dom/input {:type     "password" :placeholder "Password"
+                                :onChange #(let [password (-> % .-target .-value)]
+                                             (comp/transact! this [(ur.mut/update-input
+                                                                     {:user-registration/id       id
+                                                                      :user-registration/password password})
+                                                                   (ur.mut/validate-input
+                                                                     {:user-registration/id       id
+                                                                      :user-registration/password password})]))})
+                    (map #(ui-input-error %) password-errors))
+                  (dom/div
+                    (dom/input {:type     "password" :placeholder "Confirm password"
+                                :onChange #(let [confirm-password (-> % .-target .-value)]
+                                             (comp/transact! this [(ur.mut/update-input
+                                                                     {:user-registration/id               id
+                                                                      :user-registration/confirm-password confirm-password})
+                                                                   (ur.mut/validate-input
+                                                                     {:user-registration/id               id
+                                                                      :user-registration/confirm-password confirm-password})]))})
+                    (map #(ui-input-error %) confirm-password-errors))
+                  (let [disabled? (not= :valid-inputs status)]
+                    (dom/button {:disabled disabled?
+                                 :onClick  #(comp/transact! this [(ur.mut/register
+                                                                    {:user/email            email
+                                                                     :user/password         password
+                                                                     :user/confirm-password confirm-password})])}
+                                "Register"))))
+
+      (contains? #{:in-progress} status)
+      (dom/div {}
+        (dom/div {:className "spinner-border" :role "status"}
+          (dom/span {:className "sr-only"}
+            "In progress...")))
+
+      (contains? #{:success} status)
+      (dom/div {}
+        (dom/p {:className "text-success"}
+          "User registered successfully!"))
+
+      (contains? #{:failure} status)
+      (dom/div {}
+        (dom/p {} (str status))
+        (map #(dom/p {:className "text-danger"} (:message %)) remote-errors)))))
 
 (def ui-user-registration (comp/factory UserRegistration))
