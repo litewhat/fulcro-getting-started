@@ -1,6 +1,7 @@
 (ns app.parser-test
   (:require [clojure.spec.alpha :as s]
             [clojure.test :refer [deftest is testing use-fixtures]]
+            [buddy.hashers :as h]
             [app.db :as db]
             [app.parser :as sut]
             [app.test.fixtures :as fixtures]
@@ -11,10 +12,11 @@
 (deftest ^:integration register-test
   (testing "when user registered successfuly"
     (let [email "testregister1@email.com"
+          password "zaq1@WSX"
           users-before   (count (user-queries/get-all-app-users db/conn-spec))
           mutation-input {:user/email            email
-                          :user/password         "zaq1@WSX"
-                          :user/confirm-password "zaq1@WSX"}
+                          :user/password         password
+                          :user/confirm-password password}
           response (-> (sut/api-parser `[(app.user-registration.mutations/register ~mutation-input)])
                        (get 'app.user-registration.mutations/register))]
 
@@ -25,9 +27,10 @@
 
       (testing "creates user in database"
         (let [users-after (count (user-queries/get-all-app-users db/conn-spec))
-              new-user (user-queries/get-app-user-by-email db/conn-spec {:email email})]
+              new-user    (user-queries/get-app-user-by-email db/conn-spec {:email email})]
           (is (= (inc users-before) users-after))
           (is (= email (:email new-user)))
+          (is (true? (h/check password (:password new-user))))
           (is (= (:user/id response) (:id new-user)))
           (is (= (:user/created-at response) (:created_at new-user)))))))
 

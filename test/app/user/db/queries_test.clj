@@ -20,7 +20,7 @@
   (testing "successful insert"
     (let [emails    ["test1@example.com" "test2@example.com"]
           users     (for [email emails]
-                      (sut/insert-app-user db/conn-spec {:email email}))
+                      (sut/insert-app-user db/conn-spec {:email email :password "pass123"}))
           creations (map :created_at users)]
       (is (= emails (mapv :email users)))
       (is (every? nil? (map :deleted_at users)))
@@ -30,33 +30,37 @@
     (is (thrown-with-msg?
           org.postgresql.util.PSQLException
           #"ERROR: duplicate key value violates unique constraint \"app_user_email_key\""
-          (sut/insert-app-user db/conn-spec {:email "test1@example.com"})))))
+          (sut/insert-app-user db/conn-spec {:email "test1@example.com" :password "pass123"})))))
 
 (deftest ^:integration batch-insert-app-user-test
   (testing "successful insert"
-    (let [emails   ["batchtest1@example.com" "batchtest2@example.com" "batchtest3@example.com"]
-          response (sut/batch-insert-app-user db/conn-spec {:users (mapv vector emails)})
-          inserted (for [email emails] (sut/get-app-user-by-email db/conn-spec {:email email}))]
-      (is (= (count emails) (count response)))
-      (is (= (set emails) (set (mapv :email inserted))))
+    (let [users   [["batchtest1@example.com" "pass123"]
+                   ["batchtest2@example.com" "pass123"]
+                   ["batchtest3@example.com" "pass123"]]
+          response (sut/batch-insert-app-user db/conn-spec {:users users})
+          inserted (for [[email] users] (sut/get-app-user-by-email db/conn-spec {:email email}))]
+      (is (= (count users) (count response)))
+      (is (= (set (map first users)) (set (mapv :email inserted))))
       (is (every? nil? (map :deleted_at inserted)))
       (is (= 1 (count (set (map :created_at inserted)))))))
 
   (testing "email duplication"
-    (let [emails ["batchtest1@example.com" "batchtest4@example.com" "batchtest2@example.com"]]
+    (let [users [["batchtest1@example.com" "pass123"]
+                 ["batchtest2@example.com" "pass123"]
+                 ["batchtest3@example.com" "pass123"]]]
       (is (thrown-with-msg?
             org.postgresql.util.PSQLException
             #"ERROR: duplicate key value violates unique constraint \"app_user_email_key\""
-            (sut/batch-insert-app-user db/conn-spec {:users (mapv vector emails)}))))))
+            (sut/batch-insert-app-user db/conn-spec {:users users}))))))
 
 (deftest ^:integration get-app-user-by-id-test
   (testing "get inserted user by id"
     (let [email    "inserttest1@example.com"
-          inserted (sut/insert-app-user db/conn-spec {:email email})
+          inserted (sut/insert-app-user db/conn-spec {:email email :password "pass123"})
           res      (sut/get-app-user-by-id db/conn-spec {:id (:id inserted)})]
       (is (= email (:email res)))
       (is (nil? (:deleted_at res)))
-      (is (= #{:id :email :created_at :deleted_at} (set (keys res))))))
+      (is (= #{:id :email :password :created_at :deleted_at} (set (keys res))))))
 
   (testing "get user by id when does not exist"
     (let [res (sut/get-app-user-by-id db/conn-spec {:id (UUID/randomUUID)})]
@@ -69,14 +73,14 @@
         params (set (map (comp set keys) users))]
     (is (= (count emails) (count (keep identity users))))
     (is (= 1 (count params)))
-    (is (= #{:id :email :created_at :deleted_at} (first params))))
+    (is (= #{:id :email :password :created_at :deleted_at} (first params))))
   )
 
 (deftest ^:integration get-all-app-users-test
   (let [users  (sut/get-all-app-users db/conn-spec)
         params (set (map (comp set keys) users))]
     (is (= (count dbs/users) (count users)))
-    (is (= #{:id :email :created_at :deleted_at} (first params)))))
+    (is (= #{:id :email :password :created_at :deleted_at} (first params)))))
 
 (deftest ^:integration get-app-users-by-emails-test
   (testing "existing users"
@@ -84,7 +88,7 @@
           users  (sut/get-app-users-by-emails db/conn-spec {:emails emails})
           params (set (map (comp set keys) users))]
       (is (= 1 (count params)))
-      (is (= #{:id :email :created_at :deleted_at} (first params)))
+      (is (= #{:id :email :password :created_at :deleted_at} (first params)))
       (is (count emails) (count users))))
 
   (testing "nonexistent users"
@@ -145,7 +149,7 @@
           item-params     (set (map (comp set keys) response))]
       (is (= (count emails) (count response)))
       (is (= (count users-to-delete) affected))
-      (is (= #{:id :email :created_at :deleted_at} (first item-params)))
+      (is (= #{:id :email :password :created_at :deleted_at} (first item-params)))
       (is (= (count users-before) (count users-after)))))
 
   (testing "delete nonexistent users"
@@ -158,15 +162,17 @@
       (is (zero? affected)))))
 
 (deftest ^:integration get-all-not-deleted-users-test
-  (let [emails       ["get_not_deleted_test1@example.com" "get_not_deleted_test2@example.com" "get_not_deleted_test3@example.com"]
-        inserted     (sut/batch-insert-app-user db/conn-spec {:users (mapv vector emails)})
+  (let [users        [["get_not_deleted_test1@example.com" "pass123"]
+                      ["get_not_deleted_test2@example.com" "pass123"]
+                      ["get_not_deleted_test3@example.com" "pass123"]]
+        inserted     (sut/batch-insert-app-user db/conn-spec {:users users})
         users-before (sut/get-all-app-users db/conn-spec)
         soft-deleted (sut/batch-mark-deleted-app-user db/conn-spec {:ids (mapv :id inserted)})
         users-after  (sut/get-all-app-users db/conn-spec)
         not-deleted  (sut/get-all-not-deleted-users db/conn-spec)]
     (is (= (count users-before) (count users-after)))
     (is (= (count inserted) (count soft-deleted)))
-    (is (= (count emails) (count inserted)))
+    (is (= (count users) (count inserted)))
     (is (= (- (count users-after) (count soft-deleted)) (count not-deleted)))))
 
 (deftest ^:integration insert-token-test

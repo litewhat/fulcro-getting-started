@@ -6,6 +6,7 @@
 CREATE TABLE app_user (
     id          uuid DEFAULT uuid_generate_v4() PRIMARY KEY,
     email       varchar(255) NOT NULL UNIQUE,
+    password    varchar(255) NOT NULL,
     created_at  timestamp NOT NULL DEFAULT current_timestamp,
     deleted_at  timestamp NULL
 );
@@ -56,15 +57,15 @@ DROP TABLE IF EXISTS token RESTRICT;
 -- :command :returning-execute
 -- :result :one
 -- :doc Insert app_user record
-INSERT INTO app_user (email)
-    VALUES (:email)
+INSERT INTO app_user (email, password)
+    VALUES (:email, :password)
     RETURNING *;
 
 -- :name batch-insert-app-user
 -- :command :returning-execute
 -- :result :many
 -- :doc Insert many app_user records
-INSERT INTO app_user (email)
+INSERT INTO app_user (email, password)
     VALUES :tuple*:users
     RETURNING *;
 

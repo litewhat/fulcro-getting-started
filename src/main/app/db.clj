@@ -21,10 +21,6 @@
 
 ;; migrations
 
-(comment
- (user-queries/insert-app-user conn-spec {:email "test@example.com"})
-  )
-
 (defn set-up-tables!
   [db-spec]
   (db-queries/create-extension db-spec {:name "uuid-ossp"})

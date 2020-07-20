@@ -1,5 +1,6 @@
 (ns db.seed
-  (:require [taoensso.timbre :as log]
+  (:require [buddy.hashers :as h]
+            [taoensso.timbre :as log]
             [app.db :as db]
             [app.person.db.queries :as person-queries]
             [app.user.db.queries :as user-queries]))
@@ -19,9 +20,9 @@
    ["Andy" 14]])
 
 (def users
-  [["seed1@user.com"]
-   ["seed2@user.com"]
-   ["seed3@user.com"]])
+  [["seed1@user.com" (h/derive "pass123")]
+   ["seed2@user.com" (h/derive "pass123")]
+   ["seed3@user.com" (h/derive "pass123")]])
 
 (def person-lists
   (map (comp vector str) [:friends :enemies]))
