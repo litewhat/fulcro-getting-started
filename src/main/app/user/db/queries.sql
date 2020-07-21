@@ -99,14 +99,14 @@ SELECT * FROM app_user
 -- :name delete-app-user
 -- :command :execute
 -- :result :affected
--- :doc Removes app_user record for given id
+-- :doc Remove app_user record for given id
 DELETE FROM app_user
     WHERE id = :id;
 
 -- :name batch-delete-app-user
 -- :command :execute
 -- :result :affected
--- :doc Removes app_user records for given list of ids
+-- :doc Remove app_user records for given list of ids
 DELETE FROM app_user
     WHERE id IN :tuple:ids;
 
