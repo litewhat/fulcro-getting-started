@@ -1,15 +1,16 @@
 (ns app.db-test
   (:require [clojure.test :refer [deftest testing is]]
             [hugsql.core :as hc]
-            [app.db :as db]))
+            [app.db :as db]
+            [app.db.queries :as q]))
 
 (defn list-table-names
   [db-conn]
-  (map :tablename (hc/db-run db-conn "SELECT * FROM pg_catalog.pg_tables WHERE schemaname != 'pg_catalog' AND schemaname != 'information_schema';")))
+  (map :tablename (q/get-all-tables db-conn)))
 
 (defn list-data-types
   [db-conn]
-  (map :type (hc/db-run db-conn "SELECT n.nspname as schema, t.typname as type FROM pg_type t LEFT JOIN pg_catalog.pg_namespace n ON n.oid = t.typnamespace WHERE (t.typrelid = 0 OR (SELECT c.relkind = 'c' FROM pg_catalog.pg_class c WHERE c.oid = t.typrelid)) AND NOT EXISTS(SELECT 1 FROM pg_catalog.pg_type el WHERE el.oid = t.typelem AND el.typarray = t.oid) AND n.nspname NOT IN ('pg_catalog', 'information_schema');")))
+  (map :type (q/get-all-data-types db-conn)))
 
 (deftest ^:integration db-connection-test
   (testing "all tables and data types exist after setup"
