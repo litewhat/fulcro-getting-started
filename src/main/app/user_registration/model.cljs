@@ -25,16 +25,15 @@
   (select-keys registration input-field-names))
 
 (defn split-affected-errors
-  "Takes current registration errors, presumably returned by
-  `app.user-registration.model/list-errors` function and `data`
-  map which is supposed to be validated
-  i.e. by `app.user-registration.model.validation/validate-data` function.
+  "Takes current registration errors (before performing validation) returned by
+  `app.user-registration.model/list-errors` function and `data` map which is
+  supposed to be passed to a validation function.
 
    Groups registration errors into two groups:
-   1. `:affected` by current registration process
-      - these errors should be overwritten in app state
-   2. `:unaffected` by current registration process
-      - these errors should remain unchanged in app state."
+   1. `:affected` - these errors should be overwritten in app state
+   2. `:unaffected` - these errors should remain unchanged in app state.
+
+  Validation function - see `app.user-registration.model.validation/validate-data`."
   [registration-errors data]
   (let [affected-fields (set (keys data))]
     (group-by (fn [item]

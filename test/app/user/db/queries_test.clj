@@ -34,13 +34,13 @@
 
 (deftest ^:integration batch-insert-app-user-test
   (testing "successful insert"
-    (let [users   [["batchtest1@example.com" "pass123"]
-                   ["batchtest2@example.com" "pass123"]
-                   ["batchtest3@example.com" "pass123"]]
-          response (sut/batch-insert-app-user db/conn-spec {:users users})
-          inserted (for [[email] users] (sut/get-app-user-by-email db/conn-spec {:email email}))]
-      (is (= (count users) (count response)))
-      (is (= (set (map first users)) (set (mapv :email inserted))))
+    (let [users       [["batchtest1@example.com" "pass123"]
+                       ["batchtest2@example.com" "pass123"]
+                       ["batchtest3@example.com" "pass123"]]
+          inserted    (sut/batch-insert-app-user db/conn-spec {:users users})
+          users-after (sut/get-app-users-by-emails db/conn-spec {:emails (map first users)})]
+      (is (= (count users) (count inserted) (count users-after)))
+      (is (= (set (map first users)) (set (mapv :email inserted)) (set (mapv :email users-after))))
       (is (every? nil? (map :deleted_at inserted)))
       (is (= 1 (count (set (map :created_at inserted)))))))
 
@@ -104,7 +104,7 @@
 (deftest ^:integration batch-delete-app-user-test
   (testing "delete existing users"
     (let [emails       ["seed1@user.com" "seed2@user.com" "seed3@user.com"]
-          users-before (for [email emails] (sut/get-app-user-by-email db/conn-spec {:email email}))
+          users-before (sut/get-app-users-by-emails db/conn-spec {:emails emails})
           affected     (sut/batch-delete-app-user db/conn-spec {:ids (map :id users-before)})
           users-after  (sut/get-all-app-users db/conn-spec)]
       (is (= (count emails) affected))
@@ -115,12 +115,13 @@
           users-before (sut/get-all-app-users db/conn-spec)
           affected     (sut/batch-delete-app-user db/conn-spec {:ids (vec ids)})
           users-after  (sut/get-all-app-users db/conn-spec)]
-      (is (= (count users-before) (count users-after))))))
+      (is (= (count users-before) (count users-after)))
+      (is (= 0 affected)))))
 
 (deftest ^:integration mark-deleted-app-user-test
   (testing "marking existing users as deleted"
     (let [emails    ["seed1@user.com" "seed2@user.com" "seed3@user.com"]
-          users     (for [email emails] (sut/get-app-user-by-email db/conn-spec {:email email}))
+          users     (sut/get-app-users-by-emails db/conn-spec {:emails emails})
           res       (for [user users] (sut/mark-deleted-app-user db/conn-spec {:id (:id user)}))
           deletions (map :deleted_at res)]
       (is (= (count res) (count users) (count emails)))
@@ -141,7 +142,7 @@
 (deftest ^:integration batch-mark-deleted-app-user-test
   (testing "marking existing users as deleted"
     (let [emails          ["seed1@user.com" "seed2@user.com" "seed3@user.com"]
-          users-to-delete (for [email emails] (sut/get-app-user-by-email db/conn-spec {:email email}))
+          users-to-delete (sut/get-app-users-by-emails db/conn-spec {:emails emails})
           users-before    (sut/get-all-app-users db/conn-spec)
           response        (sut/batch-mark-deleted-app-user db/conn-spec {:ids (mapv :id users-before)})
           users-after     (sut/get-all-app-users db/conn-spec)
