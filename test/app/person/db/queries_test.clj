@@ -1,21 +1,11 @@
 (ns app.person.db.queries-test
   (:require [clojure.test :refer [deftest testing is are use-fixtures]]
-            [taoensso.timbre :as log]
-            [app.db :as db]
             [db.seed :as dbs]
+            [app.db :as db]
+            [app.test.fixtures :as fixtures]
             [app.person.db.queries :as sut]))
 
-(defn db-fixture
-  [db-conn]
-  (fn [f]
-    (log/debug "Setting up tables")
-    (db/set-up-tables! db-conn)
-    (dbs/seed! db-conn)
-    (f)
-    (log/debug "Tearing down tables")
-    (db/tear-down-tables! db-conn)))
-
-(use-fixtures :each (db-fixture db/conn-spec))
+(use-fixtures :each (fixtures/db db/conn-spec))
 
 (deftest ^:integration insert-person-test
   (sut/insert-person db/conn-spec {:name "Paweł" :age 28})
@@ -36,10 +26,10 @@
                            person-record (juxt :name :age)]
                        (= [name age] (person-record (sut/get-person-by-id db/conn-spec {:id id}))))
       1 ["Paweł" 28]
-      2 ["Josh" 34]
-      3 ["Andrea" 25]
-      4 ["Eduardo" 26]
-      5 ["Richard" 60]
+      2 ["Andrea" 25]
+      3 ["Josh" 34]
+      4 ["Richard" 60]
+      5 ["Eduardo" 26]
       6 ["Michael" 64]
       7 ["Sarah" 18]
       8 ["Jacob" 16]
@@ -61,7 +51,7 @@
       (is (= #{:friends :enemies :unknown} (set (map :id person-lists)))))
 
     (is (thrown-with-msg?
-          java.sql.BatchUpdateException
+          org.postgresql.util.PSQLException
           #"ERROR: duplicate key value violates unique constraint \"person_list_pkey\""
           (sut/insert-person-list db/conn-spec {:id (str :enemies)})))))
 
@@ -77,17 +67,23 @@
   (testing "adding person to list individually"
     (let [friends-before (map #(update % :list_id read-string) (sut/get-people-by-list-id db/conn-spec {:list_id (str :friends)}))
           enemies-before (map #(update % :list_id read-string) (sut/get-people-by-list-id db/conn-spec {:list_id (str :enemies)}))
-          _              (sut/add-person-to-list db/conn-spec {:list_id (str :friends) :person_id 7})
-          _              (sut/add-person-to-list db/conn-spec {:list_id (str :enemies) :person_id 8})
+          list-people    [[:friends 7] [:enemies 8]]
+          results        (doall
+                           (for [[list-id person-id] list-people]
+                             (sut/add-person-to-list db/conn-spec {:list_id (str list-id) :person_id person-id})))
           friends-after  (map #(update % :list_id read-string) (sut/get-people-by-list-id db/conn-spec {:list_id (str :friends)}))
-          enemies-after  (map #(update % :list_id read-string) (sut/get-people-by-list-id db/conn-spec {:list_id (str :enemies)}))]
+          enemies-after  (map #(update % :list_id read-string) (sut/get-people-by-list-id db/conn-spec {:list_id (str :enemies)}))
+          result-keys    (set (map (comp set keys) results))]
+      (is (every? some? results))
+      (is (= 1 (count result-keys)))
+      (is (= #{:list_id :person_id :created_at} (first result-keys)))
       (is (= #{1 3 5} (set (map :person_id friends-before))))
       (is (= #{2 4 6} (set (map :person_id enemies-before))))
       (is (= #{1 3 5 7} (set (map :person_id friends-after))))
       (is (= #{2 4 6 8} (set (map :person_id enemies-after)))))
 
     (is (thrown-with-msg?
-          java.sql.BatchUpdateException
+          org.postgresql.util.PSQLException
           #"ERROR: duplicate key value violates unique constraint \"person_list_people_pkey\""
           (sut/add-person-to-list db/conn-spec {:list_id (str :enemies) :person_id 2})))))
 
@@ -98,14 +94,13 @@
           people-ids   [9 10]
           affected     (sut/add-people-to-list db/conn-spec {:people (mapv (partial vector list-id) people-ids)})
           list-members (map #(update % :list_id read-string) (sut/get-people-by-list-id db/conn-spec {:list_id (str :unknown)}))]
-      (is (= 2 affected))
-      (is (= 2 (count list-members)))
+      (is (= (count affected) (count list-members) (count people-ids)))
       (is (= #{9 10} (set (map :person_id list-members)))))
 
     (let [list-id    (str :unknown)
           people-ids [9 10]]
       (is (thrown-with-msg?
-            java.sql.BatchUpdateException
+            org.postgresql.util.PSQLException
             #"ERROR: duplicate key value violates unique constraint \"person_list_people_pkey\""
             (sut/add-people-to-list db/conn-spec {:people (mapv (partial vector list-id) people-ids)}))))))
 
@@ -138,17 +133,20 @@
         people-before (sut/get-all-people db/conn-spec)
         inserted      (sut/batch-insert-person db/conn-spec {:people people-tuples})
         people-after  (sut/get-all-people db/conn-spec)]
-    (is (= (count people-tuples) inserted))
-    (is (= (+ inserted (count people-before)) (count people-after)))))
+    (is (= (count people-tuples) (count inserted)))
+    (is (= (+ (count inserted) (count people-before)) (count people-after)))))
 
 (deftest ^:integration batch-insert-person-list-test
   (testing "inserting many lists at one go"
-    (let [list-tuples  (map (comp vector str) #{:kind :unpleasant})
-          lists-before (map #(update % :id read-string) (sut/get-all-person-lists db/conn-spec))
-          inserted     (sut/batch-insert-person-list db/conn-spec {:person_lists list-tuples})
-          lists-after  (map #(update % :id read-string) (sut/get-all-person-lists db/conn-spec))]
+    (let [list-tuples   (map (comp vector str) #{:kind :unpleasant})
+          lists-before  (map #(update % :id read-string) (sut/get-all-person-lists db/conn-spec))
+          inserted      (sut/batch-insert-person-list db/conn-spec {:person_lists list-tuples})
+          lists-after   (map #(update % :id read-string) (sut/get-all-person-lists db/conn-spec))
+          inserted-keys (set (map (comp set keys) inserted))]
 
-      (is (= 2 inserted))
+      (is (= (count list-tuples) (count inserted)))
+      (is (= 1 (count inserted-keys)))
+      (is (= #{:id :created_at} (first inserted-keys)))
       (is (= #{:friends :enemies} (set (map :id lists-before))))
       (is (= #{:friends :enemies :kind :unpleasant} (set (map :id lists-after))))
 
@@ -156,7 +154,7 @@
         (let [tuples       (map (comp vector str) #{:kind :unpleasant :tall :small})
               lists-before (map #(update % :id read-string) (sut/get-all-person-lists db/conn-spec))]
           (is (thrown-with-msg?
-                java.sql.BatchUpdateException
+                org.postgresql.util.PSQLException
                 #"ERROR: duplicate key value violates unique constraint \"person_list_pkey\""
                 (sut/batch-insert-person-list db/conn-spec {:person_lists tuples})))
           (let [lists-after (map #(update % :id read-string) (sut/get-all-person-lists db/conn-spec))]

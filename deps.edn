@@ -9,6 +9,9 @@
            com.fulcrologic/fulcro                         {:mvn/version "3.0.10"}
            com.wsscode/pathom                             {:mvn/version "2.2.15"}
 
+           ;; hashing
+           buddy/buddy-hashers                            {:mvn/version "1.4.0"}
+
            ;; http server
            ring/ring-core                                 {:mvn/version "1.6.3"}
            http-kit                                       {:mvn/version "2.3.0"}
@@ -18,8 +21,10 @@
            com.layerware/hugsql-adapter-clojure-java-jdbc {:mvn/version "0.5.1"}
            org.postgresql/postgresql                      {:mvn/version "42.2.2"}
 
-           ;; other
+           ;; logging
            com.taoensso/timbre                            {:mvn/version "4.10.0"}
+
+           ;; config
            aero                                           {:mvn/version "1.1.6"}}
  :aliases {:dev       {:extra-paths ["src/dev"]
                        :extra-deps  {org.clojure/clojurescript   {:mvn/version "1.10.742"}

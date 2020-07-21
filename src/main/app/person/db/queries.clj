@@ -27,6 +27,3 @@
 (log/debug "Initializing person queries")
 (hc/def-db-fns query-file)
 (log/debug "Person queries initialized")
-
-(comment
-  (clojure.pprint/pprint (hc/map-of-db-fns "app/person/db/queries.sql")))

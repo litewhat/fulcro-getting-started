@@ -3,17 +3,18 @@
             [com.wsscode.pathom.connect :as pc]
             [taoensso.timbre :as log]
             [app.person.resolvers :as p-res]
-            [app.person.mutations :as p-mut]))
+            [app.person.mutations :as p-mut]
+            [app.user-registration.mutations :as ur-mut]))
 
-(def resolvers [p-res/resolvers p-mut/mutations])
+(def resolvers [p-res/resolvers p-mut/mutations ur-mut/mutations])
 
 (def pathom-parser
-  (p/parser {::p/env {::p/reader [p/map-reader
-                                  pc/reader2
-                                  pc/ident-reader
-                                  pc/index-reader]
-                      ::pc/mutation-join-globals [:tempids]}
-             ::p/mutate pc/mutate
+  (p/parser {::p/env     {::p/reader                 [p/map-reader
+                                                      pc/reader2
+                                                      pc/ident-reader
+                                                      pc/index-reader]
+                          ::pc/mutation-join-globals [:tempids]}
+             ::p/mutate  pc/mutate
              ::p/plugins [(pc/connect-plugin {::pc/register resolvers})]}))
 
 (defn api-parser [query]
