@@ -20,11 +20,11 @@
     :in-progress :error :failure
 
     ;; not defined in state machine
-    :in-progress :incorect-input :in-progress
-    :in-progress :incorect-input :in-progress
+    :in-progress :wrong-input :in-progress
+    :in-progress :correct-input :in-progress
     :success :correct-input :success
     :success :wrong-input :success
-    :failure :wrong-input :failure
+    :failure :correct-input :failure
     :failure :wrong-input :failure
     :failure :success :failure
     :failure :error :failure))
