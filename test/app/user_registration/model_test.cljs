@@ -8,7 +8,7 @@
                                                     :user-registration/status status}
                                         reg-after  (sut/make-status-transition reg-before event)]
                                     (= next-status (:user-registration/status reg-after)))
-    ;; defined in state machine
+    ;; defined transitions
     :started :correct-input :valid-inputs
     :started :wrong-input :invalid-inputs
     :valid-inputs :wrong-input :invalid-inputs
@@ -19,7 +19,7 @@
     :in-progress :success :success
     :in-progress :error :failure
 
-    ;; not defined in state machine
+    ;; undefined transitions
     :in-progress :wrong-input :in-progress
     :in-progress :correct-input :in-progress
     :success :correct-input :success
@@ -49,8 +49,8 @@
          (sut/input-values registration)))
 
     (let [registration (-> (mock/registration) (dissoc :user-registration/confirm-password))]
-      (= {:user-registration/email            "abc@test.com"
-          :user-registration/password         "zaq1@WSX"}
+      (= {:user-registration/email    "abc@test.com"
+          :user-registration/password "zaq1@WSX"}
          (sut/input-values registration)))))
 
 (deftest split-affected-errors-test
@@ -69,7 +69,7 @@
                             :error/message    "Password should contain minimum 8 characters, lowercase letter, uppercase letter and number"
                             :error/field-name :user-registration/password}
           current-errors   [pass-err]
-          data-to-validate {:user-registration/email            "abcdef"}]
+          data-to-validate {:user-registration/email "abcdef"}]
       (is (= {:unaffected [pass-err]} (sut/split-affected-errors current-errors data-to-validate)))))
 
   (testing "unaffected errors exist"
@@ -81,7 +81,7 @@
                             :error/field-name :user-registration/confirm-password}
           current-errors   [pass-err confirm-pass-err]
           data-to-validate {:user-registration/confirm-password "qwe"}]
-      (is (= {:affected   [confirm-pass-err] :unaffected [pass-err]}
+      (is (= {:affected [confirm-pass-err] :unaffected [pass-err]}
              (sut/split-affected-errors current-errors data-to-validate))))))
 
 (deftest by-id-test
@@ -97,7 +97,7 @@
              registration))))
 
   (testing "registration does not exist"
-    (let [env (mock/env)
+    (let [env          (mock/env)
           registration (sut/by-id env (random-uuid))]
       (is (nil? registration)))))
 
