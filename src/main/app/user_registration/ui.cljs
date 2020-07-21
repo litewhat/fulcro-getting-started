@@ -54,12 +54,15 @@
           (dom/input {:type     "password" :placeholder "Password"
                       :onChange #(let [password (-> % .-target .-value)]
                                    (comp/transact! this [(ur.mut/update-input
-                                                           {:user-registration/id       id
-                                                            :user-registration/password password})
+                                                           {:user-registration/id               id
+                                                            :user-registration/password         password
+                                                            :user-registration/confirm-password confirm-password})
                                                          (ur.mut/validate-input
-                                                           {:user-registration/id       id
-                                                            :user-registration/password password})]))})
+                                                           {:user-registration/id               id
+                                                            :user-registration/password         password
+                                                            :user-registration/confirm-password confirm-password})]))})
           (map #(ui-input-error %) password-errors)))
+
       (let [confirm-password-errors (filter #(= :user-registration/confirm-password (:error/field-name %)) errors)]
         (dom/div
           (dom/input {:type     "password" :placeholder "Confirm password"
