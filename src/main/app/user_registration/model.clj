@@ -9,6 +9,7 @@
    :user/created-at created_at})
 
 (defn create-user
+  "Creates user in database with given email and hashed password. Returns user entity."
   [system {:keys [email password]}]
   (let [db-conn  (get-in system [:db :conn])
         new-user (q/insert-app-user db-conn {:email email :password (h/derive password)})]
